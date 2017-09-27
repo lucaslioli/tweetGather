@@ -1,9 +1,10 @@
 import sys
 import tweepy
+import time
 from authenticate import api_tokens
 
 # Variables that contains the user credentials to access Twitter API
-if(len(sys.argv) < 3):
+if(len(sys.argv) < 2):
 	print ("You need to inform the user credentials to access.")
 	exit(1)
 else:
@@ -14,19 +15,17 @@ else:
 	consumer_key 		= keys['consumer_key']
 	consumer_secret 	= keys['consumer_secret']
 
-	user_seed = sys.argv[2]
-
 if __name__ == '__main__':
 	auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 	auth.set_access_token(access_token, access_token_secret)
 
-	api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+	api = tweepy.API(auth)
 
 	#override tweepy.StreamListener to add logic to on_status
 	class MyStreamListener(tweepy.StreamListener):
 
 		def on_status(self, status):
-			print(status.author.screen_name, status.created_at, status.text)
+			print(status.author.screen_name, "Favourites: "+str(status.favorite_count), "Retweets: "+str(status.retweet_count), "Replies: "+str(status.reply_count), status.created_at, status.text, "\n\n")
 
 		def on_error(self, status_code):
 			print >> sys.stderr, 'Encountered error with status code:', status_code
@@ -36,7 +35,11 @@ if __name__ == '__main__':
 			print >> sys.stderr, 'Timeout...'
 			return True # Don't kill the stream
 
-	myStream = tweepy.streaming.Stream(auth, MyStreamListener())
-	myStream.filter(track=['neymar'])
+	user  = api.me()
+	
+	follow_list = []
+	for friend in user.friends():
+		follow_list.append(str(friend.id))
 
-	return True
+	myStream = tweepy.streaming.Stream(auth, MyStreamListener())
+	myStream.userstream(_with='followings')

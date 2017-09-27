@@ -25,25 +25,6 @@ if __name__ == '__main__':
 
 	api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
-	#override tweepy.StreamListener to add logic to on_status
-	class MyStreamListener(tweepy.StreamListener):
-
-		def on_status(self, status):
-			print(status.author.screen_name, status.created_at, status.text)
-
-		def on_error(self, status_code):
-			print >> sys.stderr, 'Encountered error with status code:', status_code
-			return True # Don't kill the stream
-
-		def on_timeout(self):
-			print >> sys.stderr, 'Timeout...'
-			return True # Don't kill the stream
-
-	myStream = tweepy.streaming.Stream(auth, MyStreamListener())
-	myStream.filter(track=['neymar'])
-
-	exit(1)
-
 	public_tweets = api.home_timeline()
 
 	print ("\n\n>>>>>>> HOME TIMELINE TWEETS")
@@ -53,11 +34,11 @@ if __name__ == '__main__':
 		i += 1
 
 	user = api.get_user(user_seed)
-	print ("\n>>>>>>>USER SCREEN NAME: " + user.screen_name)
-	print ("\n>>>>>>>USER FOLLOWERS COUNT: " + str(user.friends_count))
+	print ("\n>>>>>>> USER SCREEN NAME: " + user.screen_name)
+	print ("\n>>>>>>> USER FOLLOWERS COUNT: " + str(user.friends_count))
 
 	print ("\n>>>>>>> USER FRIENDS SCREAN NAME")
 	i = 0
-	for friend in  user.friends():
+	for friend in user.friends():
 		print ("\t" + str(i) + ". " + friend.screen_name + "\t id- " + str(friend.id))
 		i += 1
