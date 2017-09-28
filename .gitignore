@@ -102,3 +102,6 @@ ENV/
 
 # Twitter API tokens
 authenticate.py
+
+# Tweet Example
+tweet_exemple.txt

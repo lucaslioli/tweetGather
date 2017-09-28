@@ -1,6 +1,5 @@
 import sys
 import tweepy
-import time
 from authenticate import api_tokens
 
 # Variables that contains the user credentials to access Twitter API
