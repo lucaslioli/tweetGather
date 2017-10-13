@@ -16,7 +16,8 @@ CREATE TABLE IF NOT EXISTS `user` (
 DROP TABLE IF EXISTS `user_followers_history`;
 CREATE TABLE IF NOT EXISTS `user_followers_history` (
   `user_id` bigint(20) NOT NULL,
-  `user_followers` int(11) DEFAULT NULL,
+  `user_followers` int(11) NOT NULL DEFAULT '0',
+  `difference` int(11) DEFAULT '0',
   `datetime` DATETIME NOT NULL,
   PRIMARY KEY (`user_id`),
   KEY `FK1_user` (`user_id`),
