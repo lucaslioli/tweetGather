@@ -102,6 +102,7 @@ ENV/
 
 # Twitter API tokens
 authenticate.py
-
 # Tweet Example
 tweet_exemple.txt
+# Scripts manuais de insersão
+insert_followers.sql

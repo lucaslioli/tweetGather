@@ -73,7 +73,7 @@ function searchGraphData($id){
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	    if($id != 0){
-	    	$query = $conn->query("SELECT * FROM user_followers_history WHERE user_id=".$id." ORDER BY datetime");
+	    	$query = $conn->query("SELECT * FROM user_followers_history WHERE user_id=".$id." ORDER BY date_time");
 	    	$dados = [['Count','Difference']];
 	    	$count = 0;
 		    while($row = $query->fetch(PDO::FETCH_OBJ)){
@@ -81,21 +81,21 @@ function searchGraphData($id){
 			  	$count++;
 		    }
 	    }else{
-	    	$query = $conn->query("SELECT datetime,
+	    	$query = $conn->query("SELECT date_time,
 									    (SELECT h1.difference
 									     FROM user_followers_history h1
-									     WHERE h1.datetime = h.datetime
+									     WHERE h1.date_time = h.date_time
 									         AND user_id = 109065990) AS alex_diff,
 
 									    (SELECT h2.difference
 									     FROM user_followers_history h2
-									     WHERE h2.datetime = h.datetime
+									     WHERE h2.date_time = h.date_time
 									         AND user_id = 15485441) AS jimmy_diff
 									         
 									FROM user_followers_history h
 									WHERE user_id in (109065990, 15485441)
-									GROUP BY datetime
-									ORDER BY datetime;");
+									GROUP BY date_time
+									ORDER BY date_time;");
     		$dados = [['Count','Alex Jones', 'jimmy fallon']];
 		    $count = 0;
 		    while($row = $query->fetch(PDO::FETCH_OBJ)){

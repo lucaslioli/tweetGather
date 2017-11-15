@@ -27,14 +27,16 @@ CREATE TABLE IF NOT EXISTS `user_followers_history` (
 DROP TABLE IF EXISTS `tweet`;
 CREATE TABLE IF NOT EXISTS `tweet` (
   `tweet_id` bigint(20) NOT NULL,
-  `user_id` bigint(20) NOT NULL,
   `tweet_text` varchar(255) COLLATE utf8_bin NOT NULL,
   `tweet_datetime` timestamp NOT NULL,
-  `tweet_encoding` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `tweet_language` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `tweet_retweets` int(11) DEFAULT NULL,
   `tweet_likes` int(11) DEFAULT NULL,
   `tweet_replies` int(11) DEFAULT NULL,
-  `tweet_replied` bigint(20) DEFAULT NULL,
+  `tweet_replied_to` bigint(20) DEFAULT NULL,
+  `user_id` bigint(20) NOT NULL,
+  `user_followers` INT NULL DEFAULT NULL,
+  `user_followers_diff` INT NULL DEFAULT NULL,
   PRIMARY KEY (`tweet_id`),
   KEY `FK1_user_tweet` (`user_id`),
   CONSTRAINT `FK1_user_tweet` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
