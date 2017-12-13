@@ -42,9 +42,10 @@ if __name__ == '__main__':
 
 			conn.insert_user(user_insert)
 
+			tweet_insert = {}
 			tweet_insert["id"]                    = status.id
 			tweet_insert["text"]                  = status.text
-			tweet_insert["timestamp_ms"]          = datetime.datetime.fromtimestamp(int(status.timestamp_ms)).strftime('%Y-%m-%d %H:%M:%S')
+			tweet_insert["timestamp_ms"]          = status.created_at
 			tweet_insert["lang"]                  = status.lang
 			tweet_insert["retweet_count"]         = status.retweet_count
 			tweet_insert["favorite_count"]        = status.favorite_count
@@ -54,6 +55,8 @@ if __name__ == '__main__':
 			tweet_insert["followers_count"]       = status.author.followers_count
 
 			conn.insert_tweet(tweet_insert)
+
+			return True; # Don't kill the stream
 
 		def on_error(self, status_code):
 			print >> sys.stderr, 'Encountered error with status code:', status_code
