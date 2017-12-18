@@ -1,10 +1,52 @@
-<? if(isset($_GET["userId"]) && !empty(trim($_GET["userId"]))){
+<?php
+if(isset($_GET["userId"]) && !empty(trim($_GET["userId"]))){
 	$tipo = $_GET["userId"];
 	$nome = $_GET["userName"];
 }else{
 	$tipo = 0;
 	$nome = "Everyone";
-} ?>
+}
+
+function searchGraphData($id){
+	try {
+	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "tw33tg4ther");
+	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+	    if($id != 0){
+	    	$query = $conn->query("SELECT * FROM tweet WHERE user_id=".$id." ORDER BY tweet_datetime");
+	    	$dados = [['Count','Difference']];
+	    	$count = 0;
+		    while($row = $query->fetch(PDO::FETCH_OBJ)){
+			  	$dados[] = [$count, (int) $row->user_followers_diff];
+			  	$count++;
+		    }
+	    }
+		
+	}catch(PDOException $e){
+	    echo 'ERROR: ' . $e->getMessage();
+	}
+
+	return json_encode($dados);
+} 
+
+function allUsers(){
+	try {
+	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "tw33tg4ther");
+	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+	    $query = $conn->query("SELECT * FROM user ORDER BY user_name");
+	    $dados = [];
+
+	    while($row = $query->fetch(PDO::FETCH_OBJ))
+		  	$dados[] = ["id" => $row->user_id, "nome" => $row->user_name];
+		
+	}catch(PDOException $e){
+	    echo 'ERROR: ' . $e->getMessage();
+	}
+
+	return $dados;
+}
+?>
 
 <html>
 	<head>
@@ -24,27 +66,19 @@
 			    <div class="container-fluid">
 			        <div class="navbar-menubuilder welcome">
 			            <ul class="nav navbar-nav nav-center">
-			            	<? $allUsers = allUsers();
-			            	foreach ($allUsers as $i => $user){ ?>
-								<li class="btn_menu">
-				                    <div class="button text-center">
-				                    	<a href="?userId=<?= $user["id"]; ?>&userName=<?= $user["nome"]; ?>">
-				                            <button type="button" class="btn btn-default">
-				                            	<strong><?= $user["nome"]?></strong>
-				                            </button>
-			                            </a>
-				                    </div>
-				                </li>
-			            	<? } ?>
-			            	<li class="btn_menu">
-			                    <div class="button text-center">
-			                    	<a href="?userId=0&userName=InterestingCase">
-			                            <button type="button" class="btn btn-primary">
-			                            	<strong>Alex Jones X jimmy fallon</strong>
-			                            </button>
-		                            </a>
-			                    </div>
-			                </li>
+			            	<?php
+			            	$users = allUsers();
+			            	foreach ($users as $i => $user){ ?>
+		            			<li class="btn_menu">
+					                    <div class="button text-center">
+					                    	<a href="?userId=<?php echo $user["id"];?>&userName=<?php echo $user["nome"];?>">
+					                            <button type="button" class="btn btn-default">
+					                            	<strong><?php echo $user["nome"];?></strong>
+					                            </button>
+				                            </a>
+					                    </div>
+					                </li>
+			            	<?php } ?>
 			            </ul>
 			        </div>
 			    </div>
@@ -53,8 +87,8 @@
 		<main id="mainWelcome" class="footer-align">
 			<div id="container">
 				<div id="curve_chart"></div>
-				<div style="display: none;" id="dataGraph"><?= searchGraphData($tipo); ?></div>
-				<div style="display: none;" id="graphName">Oscillation of the followers increase. Account: <?= $nome; ?></div>
+				<div style="display: none;" id="dataGraph"><?php echo searchGraphData($tipo); ?></div>
+				<div style="display: none;" id="graphName">Oscillation of the followers increase. Account: <?php echo $nome; ?></div>
 		  	</div>
 		</main>
 
@@ -65,68 +99,3 @@
 		<script type="text/javascript" src="./js.js"></script>
 	</body>
 </html>
-
-<? 
-function searchGraphData($id){
-	try {
-	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
-	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-	    if($id != 0){
-	    	$query = $conn->query("SELECT * FROM user_followers_history WHERE user_id=".$id." ORDER BY date_time");
-	    	$dados = [['Count','Difference']];
-	    	$count = 0;
-		    while($row = $query->fetch(PDO::FETCH_OBJ)){
-			  	$dados[] = [$count, (int) $row->difference];
-			  	$count++;
-		    }
-	    }else{
-	    	$query = $conn->query("SELECT date_time,
-									    (SELECT h1.difference
-									     FROM user_followers_history h1
-									     WHERE h1.date_time = h.date_time
-									         AND user_id = 109065990) AS alex_diff,
-
-									    (SELECT h2.difference
-									     FROM user_followers_history h2
-									     WHERE h2.date_time = h.date_time
-									         AND user_id = 15485441) AS jimmy_diff
-									         
-									FROM user_followers_history h
-									WHERE user_id in (109065990, 15485441)
-									GROUP BY date_time
-									ORDER BY date_time;");
-    		$dados = [['Count','Alex Jones', 'jimmy fallon']];
-		    $count = 0;
-		    while($row = $query->fetch(PDO::FETCH_OBJ)){
-			  	$dados[] = [$count, (int) $row->alex_diff, (int) $row->jimmy_diff];
-			  	$count++;
-		    }
-	    }
-
-		
-	}catch(PDOException $e){
-	    echo 'ERROR: ' . $e->getMessage();
-	}
-
-	return json_encode($dados);
-} 
-
-function allUsers(){
-	try {
-	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
-	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-	    $query = $conn->query("SELECT * FROM user ORDER BY user_name");
-	    $dados = [];
-
-	    while($row = $query->fetch(PDO::FETCH_OBJ))
-		  	$dados[] = ["id" => $row->user_id, "nome" => $row->user_name];
-		
-	}catch(PDOException $e){
-	    echo 'ERROR: ' . $e->getMessage();
-	}
-
-	return $dados;
-} 
-?>
