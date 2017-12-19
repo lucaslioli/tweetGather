@@ -12,7 +12,9 @@ class MyStreamListener(tweepy.StreamListener):
 		print("-----------------------------------------")
 		print("Date:", status.created_at)
 		print("User:", status.author.screen_name)
-		print("Text:", status.text, "\n")
+		print("Text:", status.text)
+
+		conn = DbConnecion()
 
 		user_insert = {}
 		user_insert['id']            = status.author.id
@@ -40,11 +42,11 @@ class MyStreamListener(tweepy.StreamListener):
 		return True; # Don't kill the stream
 
 	def on_error(self, status_code):
-		print >> sys.stderr, 'Encountered error with status code:', status_code
+		print(sys.stderr, 'Encountered error with status code:', status_code)
 		return True # Don't kill the stream
 
 	def on_timeout(self):
-		print >> sys.stderr, 'Timeout...'
+		print(sys.stderr, 'Timeout...')
 		return True # Don't kill the stream
 
 # Start the Stream Listener
@@ -58,7 +60,7 @@ def start_stream():
 
 # Variables that contains the user credentials to access Twitter API
 if(len(sys.argv) < 2):
-	print ("You need to inform the user credentials to access.")
+	print("You need to inform the user credentials to access.")
 	exit(1)
 else:
 	keys = api_tokens(sys.argv[1])
@@ -76,12 +78,4 @@ if __name__ == '__main__':
 	# Autenticação com a API
 	api = tweepy.API(auth)
 
-	conn = DbConnecion()
-
 	start_stream()
-
-	# user  = api.me()
-
-	# follow_list = []
-	# for friend in user.friends():
-	# 	follow_list.append(str(friend.id))
