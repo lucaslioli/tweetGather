@@ -39,6 +39,8 @@ class MyStreamListener(tweepy.StreamListener):
 
 		conn.insert_tweet(tweet_insert)
 
+		conn.close()
+
 		return True; # Don't kill the stream
 
 	def on_error(self, status_code):
