@@ -9,7 +9,7 @@ if(isset($_GET["userId"]) && !empty(trim($_GET["userId"]))){
 
 function searchGraphData($id){
 	try {
-	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "tw33tg4ther");
+	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	    if($id != 0){
@@ -31,7 +31,7 @@ function searchGraphData($id){
 
 function allUsers(){
 	try {
-	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "tw33tg4ther");
+	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	    $query = $conn->query("SELECT * FROM user ORDER BY user_name");

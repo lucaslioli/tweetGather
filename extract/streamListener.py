@@ -9,10 +9,10 @@ from db_connection import DbConnecion
 class MyStreamListener(tweepy.StreamListener):
 	
 	def on_status(self, status):
-		print("-----------------------------------------")
 		print("Date:", status.created_at)
 		print("User:", status.author.screen_name)
 		print("Text:", status.text)
+		print("-----------------------------------------")
 
 		conn = DbConnecion()
 
@@ -53,6 +53,9 @@ class MyStreamListener(tweepy.StreamListener):
 
 # Start the Stream Listener
 def start_stream():
+	print("-----------------------------------------\n"
+		+ "---------- STARTING STREAMING -----------\n"
+		+ "-----------------------------------------\n")
 	while True:
 		try:
 			myStream = tweepy.streaming.Stream(auth, MyStreamListener())
