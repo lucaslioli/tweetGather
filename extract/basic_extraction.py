@@ -1,6 +1,3 @@
-# Daily extraction of the number and variation of user's followers by crontab
-# 30 19 * * * python3 /var/www/html/tweetGather/extract/basic_extraction.py Gather
-
 import sys
 import tweepy
 
