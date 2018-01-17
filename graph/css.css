@@ -67,7 +67,7 @@ body{
 }
 
 #main-menu.navbar-default .welcome button {
-    width: 200px;
+    width: 160px;
 }
 
 #main-menu.navbar-default .navbar-nav>.active>a,
@@ -94,5 +94,5 @@ body{
 
 #curve_chart{
     width: 100%;
-    height: 75%;
+    height: 25%;
 }

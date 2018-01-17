@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS `user_followers_history` (
   `user_id` bigint(20) NOT NULL,
   `user_followers` int(11) NOT NULL DEFAULT '0',
   `difference` int(11) DEFAULT '0',
-  `datetime` DATETIME NOT NULL,
+  `date_time` DATETIME NOT NULL,
   PRIMARY KEY (`user_id`),
-  KEY `FK1_user` (`user_id`),
+  KEY `FK1_user` (`user_id`,`date_time`),
   CONSTRAINT `FK1_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
