@@ -32,7 +32,9 @@ if __name__ == '__main__':
 	conn = DbConnecion()
 
 	print ("\n>>>>>>> USERS FOLLOWED AND THEIR FOLLOWERS")
-	for friend in user.friends():
+	ct = 0;
+	for friend in user.friends(count=42):
+		ct += 1
 		user_insert = {}
 		user_insert['id'] = friend.id
 		user_insert['followers_count'] = friend.followers_count
@@ -49,3 +51,5 @@ if __name__ == '__main__':
 		print ("\tID: " + str(friend.id))
 		print ("\tName: " + friend.name)
 		print ("\tFollowers: " + str(friend.followers_count))
+	
+	print ("Friends counter: " + str(ct))
