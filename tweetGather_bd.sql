@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `user` (
 
 DROP TABLE IF EXISTS `user_followers_history`;
 CREATE TABLE IF NOT EXISTS `user_followers_history` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
   `user_followers` int(11) NOT NULL DEFAULT '0',
   `difference` int(11) DEFAULT '0',
@@ -37,6 +38,7 @@ CREATE TABLE IF NOT EXISTS `tweet` (
   `user_id` bigint(20) NOT NULL,
   `user_followers` INT NULL DEFAULT NULL,
   `user_followers_diff` INT NULL DEFAULT NULL,
+  `user_tweet_counter` INT NULL DEFAULT NULL,
   PRIMARY KEY (`tweet_id`),
   KEY `FK1_user_tweet` (`user_id`),
   CONSTRAINT `FK1_user_tweet` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
