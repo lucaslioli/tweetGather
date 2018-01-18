@@ -23,7 +23,7 @@ class DbConnecion(object):
             with self.mysqlCon.cursor() as cur:
                 sql = "SELECT `user_id` FROM `user` WHERE `user_id` = %s"
                 
-                cur.execute(sql, (user_id,))
+                cur.execute(sql, (user_id))
                 
                 result = cur.fetchone()
 
@@ -54,6 +54,8 @@ class DbConnecion(object):
             tweet_likes        = tweet["favorite_count"]
             tweet_replies      = tweet["reply_count"]
             tweet_replied_to   = tweet["in_reply_to_status_id"]
+            tweet_polarity     = tweet["polarity"]
+            tweet_subjectivity = tweet["subjectivity"]
             user_id            = tweet["user_id"]
             user_followers     = tweet["followers_count"]
             user_tweet_counter = tweet["statuses_count"]
@@ -62,7 +64,7 @@ class DbConnecion(object):
             with self.mysqlCon.cursor() as cur:
                 sql = "SELECT `tweet_id` FROM `tweet` WHERE `tweet_id` = %s"
 
-                cur.execute(sql, (tweet_id,))
+                cur.execute(sql, (tweet_id))
                 
                 result = cur.fetchone()
 
@@ -70,9 +72,9 @@ class DbConnecion(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = "INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, user_id, user_followers, user_tweet_counter, user_followers_diff) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (SELECT %s-t1.user_followers FROM tweet t1 WHERE t1.user_id = %s ORDER BY t1.tweet_datetime DESC LIMIT 1))"
+                        sql = "INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, user_id, user_followers, user_tweet_counter, user_followers_diff) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (SELECT %s-t1.user_followers FROM tweet t1 WHERE t1.user_id = %s ORDER BY t1.tweet_datetime DESC LIMIT 1))"
                         
-                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, user_id, user_followers, user_tweet_counter, user_followers, user_id))
+                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, user_id, user_followers, user_tweet_counter, user_followers, user_id))
                         
                         self.mysqlCon.commit()
 
@@ -101,3 +103,35 @@ class DbConnecion(object):
 
         else: 
             return False
+
+    def tweet_list(self, where = ""):
+        sql = "SELECT tweet_id as id, tweet_text as txt, tweet_language as lang FROM tweet " + where
+
+        cur = self.mysqlCon.cursor()
+
+        cur.execute(sql)
+        
+        result = cur.fetchall()
+
+        cur.close()
+
+        return result
+
+    def update_sentiment(self, tweet_id, polarity, subjectivity):
+        sql = "UPDATE tweet SET tweet_polarity = %s, tweet_subjectivity = %s WHERE tweet_id = %s"
+
+        cur = self.mysqlCon.cursor()
+
+        try:
+            cur.execute(sql, (polarity, subjectivity, tweet_id))
+
+            self.mysqlCon.commit()
+
+            result = "Ok"
+
+        except ValueError:
+            result = ValueError + 'EXEPTION occurred!'
+
+        cur.close()
+
+        return result

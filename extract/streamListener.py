@@ -2,6 +2,7 @@ import sys
 import tweepy
 import datetime
 
+from textblob import TextBlob
 from authenticate import api_tokens
 from db_connection import DbConnecion
 from log import logfile
@@ -36,9 +37,17 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_insert["favorite_count"]        = status.favorite_count
         tweet_insert["reply_count"]           = status.reply_count
         tweet_insert["in_reply_to_status_id"] = status.in_reply_to_status_id
-        tweet_insert["user_id"]               = status.author.id
-        tweet_insert["followers_count"]       = status.author.followers_count
-        tweet_insert["statuses_count"]        = status.author.statuses_count
+
+        tweet_insert["user_id"]         = status.author.id
+        tweet_insert["followers_count"] = status.author.followers_count
+        tweet_insert["statuses_count"]  = status.author.statuses_count
+
+        text = TextBlob(status.text)
+        if status.lang != 'en':
+            text = TextBlob(str(text.translate(to='en')))
+
+        tweet_insert["polarity"]     = text.sentiment.polarity
+        tweet_insert["subjectivity"] = text.sentiment.subjectivity
 
         conn.insert_tweet(tweet_insert)
 

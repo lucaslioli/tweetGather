@@ -43,3 +43,6 @@ CREATE TABLE IF NOT EXISTS `tweet` (
   KEY `FK1_user_tweet` (`user_id`),
   CONSTRAINT `FK1_user_tweet` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+ALTER TABLE `tweet` ADD `tweet_polarity` DECIMAL(7,6) NULL AFTER `tweet_replied_to`;
+ALTER TABLE `tweet` ADD `tweet_subjectivity` DECIMAL(7,6) NULL DEFAULT NULL AFTER `tweet_polarity`;
