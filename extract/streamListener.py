@@ -44,8 +44,11 @@ class MyStreamListener(tweepy.StreamListener):
 
         text = TextBlob(status.text)
         if status.lang != 'en':
-            text = TextBlob(str(text.translate(to='en')))
-
+            try:
+                text = TextBlob(str(text.translate(to='en')))
+            except:
+                print("\nThe text can't be translated.\n")
+            
         tweet_insert["polarity"]     = text.sentiment.polarity
         tweet_insert["subjectivity"] = text.sentiment.subjectivity
 
