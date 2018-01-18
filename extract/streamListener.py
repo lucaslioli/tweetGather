@@ -11,10 +11,10 @@ from log import logfile
 class MyStreamListener(tweepy.StreamListener):
     
     def on_status(self, status):
+        print("-----------------------------------------")
         print("Date:", status.created_at)
         print("User:", status.author.screen_name)
         print("Text:", status.text)
-        print("-----------------------------------------")
 
         conn = DbConnecion()
 
@@ -95,6 +95,7 @@ def start_stream():
             print(message)
             print("-----------------------------------------")
             logfile(message)
+            
             continue
 
 # Variables that contains the user credentials to access Twitter API

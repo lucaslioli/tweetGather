@@ -2,22 +2,33 @@
 if(isset($_GET["userId"]) && !empty(trim($_GET["userId"]))){
 	$tipo = $_GET["userId"];
 	$nome = $_GET["userName"];
-}else{
-	$tipo = 0;
-	$nome = "Everyone";
 }
 
-function searchGraphData($id){
+function searchGraphData($id, $table="tweet", $order_by="tweet_datetime", $sentiment = False){
 	try {
 	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	    if($id != 0){
-	    	$query = $conn->query("SELECT * FROM tweet WHERE user_id=".$id." ORDER BY tweet_datetime");
-	    	$dados = [['Count','Difference']];
+	    	$query = $conn->query("SELECT * FROM ".$table." WHERE user_id=".$id." ORDER BY ".$order_by);
+	    	
+	    	if(!$sentiment)
+	    		$dados = [['Count','Difference']];
+	    	else
+	    		$dados = [['Count','Sentiment']];
+
 	    	$count = 0;
+		    
 		    while($row = $query->fetch(PDO::FETCH_OBJ)){
-			  	$dados[] = [$count, (int) $row->user_followers_diff];
+		    	if($table == "tweet" && !$sentiment)
+			  		$dados[] = [$count, (int) $row->user_followers_diff];
+
+			  	else if($table == "tweet" && $sentiment)
+			  		$dados[] = [$count, (float) $row->tweet_polarity ];
+			  	
+			  	else
+			  		$dados[] = [$count, (int) $row->difference];
+			  	
 			  	$count++;
 		    }
 	    }
@@ -84,11 +95,24 @@ function allUsers(){
 			    </div>
 			</div>
 		</header>
-		<main id="mainWelcome" class="footer-align">
+
+		<main id="mainWelcome">
 			<div id="container">
-				<div id="curve_chart"></div>
-				<div style="display: none;" id="dataGraph"><?php echo searchGraphData($tipo); ?></div>
-				<div style="display: none;" id="graphName">Oscillation of the followers increase. Account: <?php echo $nome; ?></div>
+				<div id="curve_chart_tw" class="chart"></div>
+				<div style="display: none;" id="dataGraphTw"><?php echo searchGraphData($tipo); ?></div>
+				<div style="display: none;" id="graphNameTw">Oscillation of the followers increase by Tweet. Account: <?php echo $nome; ?></div>
+		  	</div>
+
+		  	<div id="container">
+				<div id="curve_chart_st" class="chart"></div>
+				<div style="display: none;" id="dataGraphSt"><?php echo searchGraphData($tipo, 'tweet', 'tweet_datetime', True); ?></div>
+				<div style="display: none;" id="graphNameSt">Oscillation of the sentiments by Tweet. Account: <?php echo $nome; ?></div>
+		  	</div>
+
+		  	<div id="container">
+				<div id="curve_chart_day" class="chart"></div>
+				<div style="display: none;" id="dataGraphDay"><?php echo searchGraphData($tipo, 'user_followers_history', 'date_time'); ?></div>
+				<div style="display: none;" id="graphNameDay">Oscillation of the followers increase by Day. Account: <?php echo $nome; ?></div>
 		  	</div>
 		</main>
 
