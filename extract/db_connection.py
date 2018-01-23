@@ -48,14 +48,14 @@ class DbConnecion(object):
         if 'id' in tweet:
             tweet_id           = tweet["id"]
             tweet_text         = tweet["text"]
-            tweet_datetime     = tweet["timestamp_ms"]
+            tweet_datetime     = tweet["created_at"]
             tweet_language     = tweet["lang"]
             tweet_retweets     = tweet["retweet_count"]
             tweet_likes        = tweet["favorite_count"]
             tweet_replies      = tweet["reply_count"]
             tweet_replied_to   = tweet["in_reply_to_status_id"]
-            tweet_polarity     = tweet["polarity"]
-            tweet_subjectivity = tweet["subjectivity"]
+            tweet_polarity     = round(tweet["polarity"], 6)
+            tweet_subjectivity = round(tweet["subjectivity"], 6)
             user_id            = tweet["user_id"]
             user_followers     = tweet["followers_count"]
             user_tweet_counter = tweet["statuses_count"]
@@ -124,6 +124,32 @@ class DbConnecion(object):
 
         try:
             cur.execute(sql, (polarity, subjectivity, tweet_id))
+
+            self.mysqlCon.commit()
+
+            result = "Ok"
+
+        except ValueError:
+            result = ValueError + 'EXEPTION occurred!'
+
+        cur.close()
+
+        return result
+
+    def update_tweet(self, tweet_id, date_time = ''):
+
+        if date_time == '':
+            sql = "UPDATE tweet SET tweet_datetime = NULL WHERE tweet_id = %s"
+        else:
+            sql = "UPDATE tweet SET tweet_datetime = %s WHERE tweet_id = %s"
+
+        cur = self.mysqlCon.cursor()
+
+        try:
+            if date_time == '':
+                cur.execute(sql, (tweet_id))
+            else:
+                cur.execute(sql, (date_time, tweet_id))
 
             self.mysqlCon.commit()
 

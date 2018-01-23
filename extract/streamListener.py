@@ -31,7 +31,7 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_insert = {}
         tweet_insert["id"]                    = status.id
         tweet_insert["text"]                  = status.text
-        tweet_insert["timestamp_ms"]          = status.created_at
+        tweet_insert["created_at"]            = status.created_at
         tweet_insert["lang"]                  = status.lang
         tweet_insert["retweet_count"]         = status.retweet_count
         tweet_insert["favorite_count"]        = status.favorite_count
@@ -47,7 +47,12 @@ class MyStreamListener(tweepy.StreamListener):
             try:
                 text = TextBlob(str(text.translate(to='en')))
             except:
-                print("\nThe text can't be translated.\n")
+                message = "WARING: " + str(status.id) + "The text can not be translated."
+                
+                print("-----------------------------------------")
+                print(message)
+                logfile(message)
+                print("-----------------------------------------")
             
         tweet_insert["polarity"]     = text.sentiment.polarity
         tweet_insert["subjectivity"] = text.sentiment.subjectivity
@@ -89,8 +94,8 @@ def start_stream():
             myStream = tweepy.streaming.Stream(auth, MyStreamListener())
             myStream.userstream(_with='followings')
         
-        except ValueError:
-            message = ValueError + 'EXEPTION occurred!'
+        except:
+            message = 'ERROR: Exeption occurred!'
 
             print(message)
             print("-----------------------------------------")
