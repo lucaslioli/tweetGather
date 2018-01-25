@@ -43,7 +43,6 @@ if __name__ == '__main__':
 		user_insert["friends_count"] = friend.friends_count
 		user_insert["lang"] = friend.lang
 
-		
 		conn.insert_user(user_insert)
 		conn.insert_user_followers_history(user_insert)
 

@@ -2,29 +2,36 @@
 if(isset($_GET["userId"]) && !empty(trim($_GET["userId"]))){
 	$tipo = $_GET["userId"];
 	$nome = $_GET["userName"];
+}else{
+	$tipo = "15485441";
+	$nome = "jimmy fallon";
 }
 
-function searchGraphData($id, $table="tweet", $order_by="tweet_datetime", $sentiment = False){
+function searchGraphData($id, $table="tweet", $order_by="tweet_id", $sentiment = False){
 	try {
 	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	    if($id != 0){
-	    	$query = $conn->query("SELECT * FROM ".$table." WHERE user_id=".$id." ORDER BY ".$order_by);
+	    	if($table == "tweet"){
+		    	$query = $conn->query("SELECT user_followers_diff as diff, IF(tweet_datetime, DATE_FORMAT(tweet_datetime, '%d/%m'),'!/!') as date_time, tweet_polarity as polarity FROM tweet WHERE user_id=".$id." ORDER BY tweet_id");
+
+	    		$dados = [['Date','Difference']];
 	    	
-	    	if(!$sentiment)
-	    		$dados = [['Count','Difference']];
-	    	else
+	    	}else{
+		    	$query = $conn->query("SELECT * FROM ".$table." WHERE user_id=".$id." ORDER BY ".$order_by);
+	    		
 	    		$dados = [['Count','Sentiment']];
+	    	}
 
 	    	$count = 0;
 		    
 		    while($row = $query->fetch(PDO::FETCH_OBJ)){
 		    	if($table == "tweet" && !$sentiment)
-			  		$dados[] = [$count, (int) $row->user_followers_diff];
+			  		$dados[] = [$row->date_time, (int) $row->diff];
 
 			  	else if($table == "tweet" && $sentiment)
-			  		$dados[] = [$count, (float) $row->tweet_polarity ];
+			  		$dados[] = [$row->date_time, (float) $row->polarity];
 			  	
 			  	else
 			  		$dados[] = [$count, (int) $row->difference];
@@ -114,6 +121,7 @@ function allUsers(){
 				<div style="display: none;" id="dataGraphDay"><?php echo searchGraphData($tipo, 'user_followers_history', 'date_time'); ?></div>
 				<div style="display: none;" id="graphNameDay">Oscillation of the followers increase by Day. Account: <?php echo $nome; ?></div>
 		  	</div>
+		  	<br/>
 		</main>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
