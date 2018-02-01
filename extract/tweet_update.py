@@ -27,18 +27,20 @@ if __name__ == '__main__':
         
     conn = DbConnecion()
 
-    tweets = conn.tweet_list("WHERE tweet_id > 951081955793211393")
+    tweets = conn.tweet_list("")
 
     i = len(tweets)
 
     for tw in tweets:
 
         try:
-            tweet_original = api.get_status(tw['id'])
+            original = api.get_status(tw['id'])
 
-            conn.update_tweet(tw['id'], tweet_original.created_at)
+            conn.update_tweet(tw['id'], original.created_at, original.retweet_count, original.favorite_count)
 
-            print("\n", "Nº: ", i, tw['id'], "=>", tweet_original.created_at)
+            print("\n", "Nº: ", i, tw['id'], "=>", original.created_at)
+            print(" RTs: ", "=>", original.retweet_count)
+            print(" Likes: ", "=>", original.favorite_count)
         
         except:
             conn.update_tweet(tw['id'], '')

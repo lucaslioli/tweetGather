@@ -1,6 +1,7 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChartByTweet);
 google.charts.setOnLoadCallback(drawChartByDay);
+google.charts.setOnLoadCallback(drawChartByRT);
 google.charts.setOnLoadCallback(drawChartBySentiment);
 
 function drawChartByTweet() {
@@ -27,6 +28,20 @@ function drawChartByDay() {
 	};
 
 	var chart = new google.visualization.AreaChart(document.getElementById('curve_chart_day'));
+
+	chart.draw(data, options);
+}
+
+function drawChartByRT() {
+	var data = google.visualization.arrayToDataTable($.parseJSON($("#dataGraphRT").html()));
+
+	var options = {
+		title: $("#graphNameRT").html(),
+		curveType: 'function',
+		legend: { position: 'bottom' }
+	};
+
+	var chart = new google.visualization.AreaChart(document.getElementById('curve_chart_rt'));
 
 	chart.draw(data, options);
 }

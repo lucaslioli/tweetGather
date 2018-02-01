@@ -7,34 +7,44 @@ if(isset($_GET["userId"]) && !empty(trim($_GET["userId"]))){
 	$nome = "jimmy fallon";
 }
 
-function searchGraphData($id, $table="tweet", $order_by="tweet_id", $sentiment = False){
+function searchGraphData($id, $table="tweet", $order_by="tweet_id", $sentiment = false, $retweets = false){
 	try {
 	  	$conn = new PDO('mysql:host=localhost;dbname=tweetgather', "root", "");
 	    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 	    if($id != 0){
 	    	if($table == "tweet"){
-		    	$query = $conn->query("SELECT user_followers_diff as diff, IF(tweet_datetime, DATE_FORMAT(tweet_datetime, '%d/%m'),'!/!') as date_time, tweet_polarity as polarity FROM tweet WHERE user_id=".$id." ORDER BY tweet_id");
+		    	$query = $conn->query("SELECT user_followers_diff as diff, IF(tweet_datetime, DATE_FORMAT(tweet_datetime, '%Y/%m/%d'),'!/!') as date_time, tweet_polarity as polarity, tweet_retweets as retweets, tweet_likes as likes FROM tweet WHERE user_id=".$id." ORDER BY tweet_id");
 
+	    		if($sentiment)
+	    			$dados = [['Date','Sentiment']];
+	    		else if ($retweets)
+	    			$dados = [['Date','Retweets', 'Likes']];
+	    		else
+	    			$dados = [['Date','Difference']];
+	    	
+	    	}else if($table == "user_followers_history"){
+		    	$query = $conn->query("SELECT t.difference, IF(date_time, DATE_FORMAT(date_time, '%Y/%m/%d'),'!/!') as date_time FROM ".$table." as t WHERE user_id=".$id." ORDER BY ".$order_by);
+	    		
 	    		$dados = [['Date','Difference']];
 	    	
-	    	}else{
-		    	$query = $conn->query("SELECT * FROM ".$table." WHERE user_id=".$id." ORDER BY ".$order_by);
-	    		
-	    		$dados = [['Count','Sentiment']];
-	    	}
+	    	}else
+	    		return 0;
 
 	    	$count = 0;
 		    
 		    while($row = $query->fetch(PDO::FETCH_OBJ)){
-		    	if($table == "tweet" && !$sentiment)
+		    	if($table == "tweet" && !$sentiment && !$retweets)
 			  		$dados[] = [$row->date_time, (int) $row->diff];
+
+			  	else if ($table == "tweet" && $retweets)
+			  		$dados[] = [$row->date_time, (int) $row->retweets, (int) $row->likes];
 
 			  	else if($table == "tweet" && $sentiment)
 			  		$dados[] = [$row->date_time, (float) $row->polarity];
 			  	
 			  	else
-			  		$dados[] = [$count, (int) $row->difference];
+			  		$dados[] = [$row->date_time, (int) $row->difference];
 			  	
 			  	$count++;
 		    }
@@ -112,8 +122,14 @@ function allUsers(){
 
 		  	<div id="container">
 				<div id="curve_chart_st" class="chart"></div>
-				<div style="display: none;" id="dataGraphSt"><?php echo searchGraphData($tipo, 'tweet', 'tweet_datetime', True); ?></div>
+				<div style="display: none;" id="dataGraphSt"><?php echo searchGraphData($tipo, 'tweet', 'tweet_datetime', true); ?></div>
 				<div style="display: none;" id="graphNameSt">Oscillation of the sentiments by Tweet. Account: <?php echo $nome; ?></div>
+		  	</div>
+
+		  	<div id="container">
+				<div id="curve_chart_rt" class="chart"></div>
+				<div style="display: none;" id="dataGraphRT"><?php echo searchGraphData($tipo, 'tweet', 'date_time', false, true); ?></div>
+				<div style="display: none;" id="graphNameRT">Oscillation of the Retweets and Likes by Tweet. Account: <?php echo $nome; ?></div>
 		  	</div>
 
 		  	<div id="container">

@@ -104,7 +104,7 @@ class DbConnecion(object):
         else: 
             return False
 
-    def tweet_list(self, where = ""):
+    def tweet_list(self, where = ''):
         sql = "SELECT tweet_id as id, tweet_text as txt, tweet_language as lang FROM tweet " + where
 
         cur = self.mysqlCon.cursor()
@@ -136,12 +136,12 @@ class DbConnecion(object):
 
         return result
 
-    def update_tweet(self, tweet_id, date_time = ''):
+    def update_tweet(self, tweet_id, date_time = '', retweets = -1, likes = -1, replies = -1):
 
         if date_time == '':
             sql = "UPDATE tweet SET tweet_datetime = NULL WHERE tweet_id = %s"
         else:
-            sql = "UPDATE tweet SET tweet_datetime = %s WHERE tweet_id = %s"
+            sql = "UPDATE tweet SET tweet_datetime = %s, tweet_retweets = %s, tweet_likes = %s, tweet_replies = %s WHERE tweet_id = %s"
 
         cur = self.mysqlCon.cursor()
 
@@ -149,7 +149,7 @@ class DbConnecion(object):
             if date_time == '':
                 cur.execute(sql, (tweet_id))
             else:
-                cur.execute(sql, (date_time, tweet_id))
+                cur.execute(sql, (date_time, retweets, likes, replies, tweet_id))
 
             self.mysqlCon.commit()
 
