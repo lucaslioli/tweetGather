@@ -1,3 +1,11 @@
+body{
+    padding-top: 20px;
+}
+
+.users-graph {
+    overflow: hidden;
+}
+
 .nav {
     margin: 10px 0px !important;
     /*padding-left: 75px;*/
@@ -9,7 +17,8 @@
 
 #main-menu {
     z-index: 3;
-    background: black;
+    padding-top: 20px;
+    background: white;
 }
 
 #main-menu .navbar-collapse {
@@ -18,10 +27,10 @@
 
 #main-menu.navbar-default {
     font-size: 15px;
-    background-color: #24292e;
+    background-color: #FFF;
     border-width: 0px;
     border-radius: 0px;
-    box-shadow: 2px -9px 5px 10px #2d2d2d;
+    /*box-shadow: 2px -9px 5px 10px #2d2d2d;*/
 }
 
 #main-menu.navbar-default .navbar-brand {
@@ -33,7 +42,7 @@
     border-right: 1px solid #fefefe;
     font-weight: bold;
     color: rgba(254, 254, 254, 1);
-    background-color: #24292e;
+    background-color: #FFF;
 }
 #main-menu.navbar-default .navbar-nav>li>a:hover,
 #main-menu.navbar-default .navbar-nav>li>a:focus {

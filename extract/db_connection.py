@@ -136,7 +136,7 @@ class DbConnecion(object):
 
         return result
 
-    def update_tweet(self, tweet_id, date_time = '', retweets = -1, likes = -1, replies = -1):
+    def update_tweet(self, tweet_id, date_time = '', retweets = -1, likes = -1):
 
         if date_time == '':
             sql = "UPDATE tweet SET tweet_datetime = NULL WHERE tweet_id = %s"
