@@ -45,7 +45,7 @@ class MyStreamListener(tweepy.StreamListener):
         text = TextBlob(status.text)
         if status.lang != 'en':
             try:
-                text = TextBlob(str(text.translate(to='en')))
+                text = TextBlob(str(text.translate(from_lang = status.lang, to='en')))
             except:
                 message = "WARING: " + str(status.id) + "The text can not be translated."
                 
