@@ -46,19 +46,22 @@ class DbConnecion(object):
 
     def insert_tweet(self, tweet):
         if 'id' in tweet:
-            tweet_id           = tweet["id"]
-            tweet_text         = tweet["text"]
-            tweet_datetime     = tweet["created_at"]
-            tweet_language     = tweet["lang"]
-            tweet_retweets     = tweet["retweet_count"]
-            tweet_likes        = tweet["favorite_count"]
-            tweet_replies      = tweet["reply_count"]
-            tweet_replied_to   = tweet["in_reply_to_status_id"]
-            tweet_polarity     = round(tweet["polarity"], 6)
-            tweet_subjectivity = round(tweet["subjectivity"], 6)
-            user_id            = tweet["user_id"]
-            user_followers     = tweet["followers_count"]
-            user_tweet_counter = tweet["statuses_count"]
+            tweet_id            = tweet["id"]
+            tweet_text          = tweet["text"]
+            tweet_datetime      = tweet["created_at"]
+            tweet_language      = tweet["lang"]
+            tweet_retweets      = tweet["retweet_count"]
+            tweet_likes         = tweet["favorite_count"]
+            tweet_replies       = tweet["reply_count"]
+            tweet_replied_to    = tweet["in_reply_to_status_id"]
+            tweet_polarity      = round(tweet["polarity"], 6)
+            tweet_subjectivity  = round(tweet["subjectivity"], 6)
+            tweet_url           = 0 if tweet_text.find('http') == -1 else 1
+            tweet_hashtag       = 0 if tweet_text.find('#') == -1 else 1
+            tweet_RT            = 0 if tweet_text.find('RT', 0, 2) == -1 else 1
+            tweet_size          = len(tweet_text)
+            tweet_for_elections = tweet["for_elections"]
+            user_id             = tweet["user_id"]
             # user_ followers_diff = atomático por SQL
 
             with self.mysqlCon.cursor() as cur:
@@ -72,9 +75,9 @@ class DbConnecion(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = "INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, user_id, user_followers, user_tweet_counter, user_followers_diff) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (SELECT %s-t1.user_followers FROM tweet t1 WHERE t1.user_id = %s ORDER BY t1.tweet_datetime DESC LIMIT 1))"
+                        sql = "INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, tweet_for_elections, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                         
-                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, user_id, user_followers, user_tweet_counter, user_followers, user_id))
+                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, tweet_for_elections, user_id))
                         
                         self.mysqlCon.commit()
 
