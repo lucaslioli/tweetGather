@@ -27,7 +27,8 @@ if __name__ == '__main__':
         
     conn = DbConnecion()
 
-    tweets = conn.tweet_list("WHERE tweet_retweets = 0")
+    # Para atualizar todos = WHERE tweet_retweets = 0
+    tweets = conn.tweet_list("WHERE tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW() ")
 
     i = len(tweets)
 
@@ -36,7 +37,7 @@ if __name__ == '__main__':
         try:
             original = api.get_status(tw['id'])
 
-            conn.update_tweet(tw['id'], original.created_at, original.retweet_count, original.favorite_count)
+            conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count)
 
             print("\n", "Nº: ", i, tw['id'], "=>", original.created_at)
             print(" RTs: ", "=>", original.retweet_count)
