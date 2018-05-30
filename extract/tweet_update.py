@@ -27,7 +27,7 @@ if __name__ == '__main__':
         
     conn = DbConnecion()
 
-    tweets = conn.tweet_list("")
+    tweets = conn.tweet_list("WHERE tweet_retweets = 0")
 
     i = len(tweets)
 

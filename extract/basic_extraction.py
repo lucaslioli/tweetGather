@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
 	print ("\n>>>>>>> USERS FOLLOWED AND THEIR FOLLOWERS")
 	ct = 0;
-	for friend in user.friends(count=42):
+	for friend in user.friends(count=99):
 		ct += 1
 		user_insert = {}
 		user_insert['id'] = friend.id
