@@ -25,8 +25,7 @@ class MyStreamListener(tweepy.StreamListener):
         user_insert['friends_count'] = status.author.friends_count
         user_insert["lang"]          = status.author.lang
 
-        # For now, all the users have already been inserted
-        # conn.insert_user(user_insert)
+        conn.insert_user(user_insert)
 
         tweet_insert = {}
         tweet_insert["id"]                    = status.id
@@ -37,7 +36,7 @@ class MyStreamListener(tweepy.StreamListener):
         tweet_insert["favorite_count"]        = status.favorite_count
         tweet_insert["reply_count"]           = status.reply_count
         tweet_insert["in_reply_to_status_id"] = status.in_reply_to_status_id
-        tweet_insert["for_elections"]         = 0
+        tweet_insert["for_elections"]         = 1
 
         tweet_insert["user_id"]         = status.author.id
         tweet_insert["followers_count"] = status.author.followers_count
@@ -93,10 +92,10 @@ def start_stream():
     while True:
         try:
             myStream = tweepy.streaming.Stream(auth, MyStreamListener())
-            myStream.userstream(_with='followings')
+            myStream.filter(track=["Aldo Rebelo", "@aldorebelo", "Alvaro Dias", "@alvarodias_", "Ciro Gomes", "@cirogomes", "Cristovam Buarque", "@Sen_Cristovam", "José Maria Eymael", "@Eymaeloficial", "Fernando Collor", "@Collor", "Flavio Rocha", "@flaviogr", "Geraldo Alckmin", "@geraldoalckmin", "Guilherme Boulos", "@GuilhermeBoulos", "Henrique Meirelles", "@meirelles", "Jair Bolsonaro", "@jairbolsonaro", "João Amoêdo", "@joaoamoedonovo", "João Vicente Goulart", "@joaovgoulart64", "Levy Fidelix", "@levyfidelix", "Luiz Inácio Lula da Silva", "@LulapeloBrasil", "Manuela D'Ávila", "@ManuelaDavila", "Marina Silva", "@silva_marina", "Michel Temer", "@MichelTemer", "Paulo Rabello de Castro", "@PRabello", "Rodrigo Maia", "@RodrigoMaia", "Valéria Monteiro", "@mntvaleria", "Vera Lúcia", "@verapstu", "@77solidariedade", "@podemos_19", "@PDT_nacional", "@pps23", "@psdcnacional", "@PRB10", "@Rede45", "@psol50", "@MDB_Nacional", "@partidonovo30", "@PartidoPPL", "@prtboficial", "@ptbrasil", "@PCdoB_Oficial", "@pscnacional", "@democratas", "@pmn33nacional", "@pstu"])
         
-        except ValueError:
-            message = 'ERROR: Exeption occurred!' + ValueError
+        except:
+            message = 'ERROR: Exeption occurred!'
 
             print(message)
             print("-----------------------------------------")
