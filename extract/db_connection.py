@@ -133,7 +133,7 @@ class DbConnecion(object):
             result = "Ok"
 
         except:
-            result = sys.exc_info()[1] + 'EXEPTION occurred!'
+            result = str(sys.exc_info()[1]) + 'EXEPTION occurred!'
 
         cur.close()
 
@@ -160,7 +160,7 @@ class DbConnecion(object):
             result = "Ok"
 
         except:
-            result = sys.exc_info()[1] + 'EXEPTION occurred!'
+            result = str(sys.exc_info()[1]) + 'EXEPTION occurred!'
 
         cur.close()
 

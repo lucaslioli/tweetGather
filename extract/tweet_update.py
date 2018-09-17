@@ -5,6 +5,40 @@ import time
 from authenticate import api_tokens
 from db_connection import DbConnecion
 from text_processing import text_cleaner
+from dictionary import *
+
+
+def calc_banality(text, lang):
+    if(lang != 'en'):
+        return {'100': -1, '1000':-1, '3000': -1}
+
+    ban_100 = 0
+    ban_1000 = 0
+    ban_3000 = 0
+    
+    for word in text.split():
+        if(word in commonwords_100()):
+            ban_100 = +1
+
+        if(word in commonwords_1000()):
+            ban_1000 = +1
+
+        if(word in commonwords_3000()):
+            ban_3000 = +1
+
+    counter = len(text.split())
+
+    if(ban_100 != 0):
+        ban_100 = ban_100/counter
+
+    if(ban_1000 != 0):
+        ban_1000 = ban_1000/counter
+
+    if(ban_3000 != 0):
+        ban_3000 = ban_3000/counter
+
+    return {'100': ban_100, '1000':ban_1000, '3000': ban_3000}
+
 
 # Variables that contains the user credentials to access Twitter API
 if(len(sys.argv) < 2):
@@ -39,16 +73,25 @@ if __name__ == '__main__':
     for tw in tweets:
 
         try:
+            # Search for the original tweet by id
             original = api.get_status(tw['id'])
 
+            # Process de the tweet message to clean the text
             text_after = text_cleaner(original.text)
 
-            conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count, text_after)
+            # Extracts the banality from the text processed for english language tweets
+            ban = calc_banality(text_after, original.lang)
+
+            # Update the information recorded in database
+            # conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count, text_after, ban['100'], ban['1000'], ban['3000'])
 
             print("\n", "Nº: ", i, tw['id'], "=>", original.created_at)
             print(" RTs =>", original.retweet_count)
             print(" Likes =>", original.favorite_count)
-            print(" Text =>", text_after)
+            print(" Text 1 =>", original.text.replace('\n', ' ').replace('\r', ''))
+            print(" Text 2 =>", text_after)
+            print(" Lang => ", original.lang)
+            print(" Banlity 100 =>", ban['100'], " | 1000 => ", ban['1000'], " | 3000 => ", ban['3000'])
             # print(" Replies: ", "=>", original.reply_count) # reply_count only for premium
         
         except:

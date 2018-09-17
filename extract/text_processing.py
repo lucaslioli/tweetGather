@@ -28,6 +28,9 @@ def text_cleaner(text):
     # Instance an object lemmatizer
     lemma = WordNetLemmatizer()
 
+    # Removes the line breaks
+    text = text.replace('\n', ' ').replace('\r', '')
+
     # To make the text minuscule
     text = text.lower()
 
@@ -50,7 +53,7 @@ def text_cleaner(text):
     text = ''.join(c for c in text if c not in pont)
 
     # Lemmatizes the text
-    text = ' '.join(lemma.lemmatize(w) for w in text.split())
+    #text = ' '.join(lemma.lemmatize(w) for w in text.split())
 
     # To remove the accents from the text
     text = ''.join(c for c in unicodedata.normalize('NFD', text)
@@ -60,7 +63,7 @@ def text_cleaner(text):
     text = ''.join([c for c in text if not c.isdigit()])
 
     # To remove words with only one character
-    text = ' '.join( [w for w in text.split() if len(w)>1] )
+    text = ' '.join( [w for w in text.split() if len(w)>1])
 
     # To remove duplicate letters - STAND BY
     # text = re.sub(r'(\w)\1+', r'\1', text)
