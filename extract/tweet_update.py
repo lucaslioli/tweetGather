@@ -1,13 +1,16 @@
 import sys
 import tweepy
+import time
 
 from authenticate import api_tokens
 from db_connection import DbConnecion
+from text_processing import text_cleaner
 
 # Variables that contains the user credentials to access Twitter API
 if(len(sys.argv) < 2):
-    print ("Necessario passar o codigo de acesso e tambem o usuario seed.")
+    print ("Necessario indicar a conta de autenticação!")
     exit(1)
+
 else:
     keys = api_tokens(sys.argv[1])
     # Obtenção das chaves de atenticação da API
@@ -27,8 +30,9 @@ if __name__ == '__main__':
         
     conn = DbConnecion()
 
-    # Para atualizar todos = WHERE tweet_retweets = 0
-    tweets = conn.tweet_list("WHERE tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 30 DAY) AND NOW() ")
+    # WHERE tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
+    # Para atualizar todos: WHERE deleted = 0
+    tweets = conn.tweet_list("")
 
     i = len(tweets)
 
@@ -37,17 +41,22 @@ if __name__ == '__main__':
         try:
             original = api.get_status(tw['id'])
 
-            conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count)
+            text_after = text_cleaner(original.text)
+
+            conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count, text_after)
 
             print("\n", "Nº: ", i, tw['id'], "=>", original.created_at)
-            print(" RTs: ", "=>", original.retweet_count)
-            print(" Likes: ", "=>", original.favorite_count)
+            print(" RTs =>", original.retweet_count)
+            print(" Likes =>", original.favorite_count)
+            print(" Text =>", text_after)
+            # print(" Replies: ", "=>", original.reply_count) # reply_count only for premium
         
         except:
-            conn.update_tweet(tw['id'], '')
+            conn.update_tweet(tw['id'])
 
-            print("\n", "Nº: ", i, tw['id'], "=> NULL")
+            print("\n", "Nº: ", i, tw['id'], " ERRO: ", sys.exc_info()[1])
 
         i -= 1
+        time.sleep(0.5)
 
     print("\n")

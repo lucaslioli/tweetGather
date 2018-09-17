@@ -32,7 +32,7 @@ class DbConnecion(object):
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
                         sql = "INSERT INTO user (user_id, user_name, user_screen_name, user_following, user_language) VALUES (%s, %s, %s, %s, %s)"
-                        
+
                         cur.execute(sql, (user_id, user_name, user_screen_name, user_following, user_language))
                         
                         self.mysqlCon.commit()
@@ -61,7 +61,7 @@ class DbConnecion(object):
             tweet_RT            = 0 if tweet_text.find('RT', 0, 2) == -1 else 1
             tweet_size          = len(tweet_text)
             tweet_for_elections = tweet["for_elections"]
-            user_id             = tweet["user_id"]
+            user_id = tweet["user_id"]
             # user_ followers_diff = atomático por SQL
 
             with self.mysqlCon.cursor() as cur:
@@ -76,7 +76,7 @@ class DbConnecion(object):
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
                         sql = "INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, tweet_for_elections, user_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                        
+
                         cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, tweet_for_elections, user_id))
                         
                         self.mysqlCon.commit()
@@ -132,34 +132,35 @@ class DbConnecion(object):
 
             result = "Ok"
 
-        except ValueError:
-            result = ValueError + 'EXEPTION occurred!'
+        except:
+            result = sys.exc_info()[1] + 'EXEPTION occurred!'
 
         cur.close()
 
         return result
 
-    def update_tweet(self, tweet_id, date_time = '', retweets = -1, likes = -1):
+    def update_tweet(self, tweet_id, retweets = -1, likes = -1, text_after = '', ban_100 = -1, ban_1000 = -1, ban_3000 = -1):
 
-        if date_time == '':
-            sql = "UPDATE tweet SET tweet_retweets = NULL, tweet_likes = NULL WHERE tweet_id = %s"
+        if retweets == -1:
+            return 0
+            sql = "UPDATE tweet SET deleted = 1 WHERE tweet_id = %s"
         else:
-            sql = "UPDATE tweet SET tweet_retweets = %s, tweet_likes = %s WHERE tweet_id = %s"
+            sql = "UPDATE tweet SET deleted = 0, tweet_retweets = %s, tweet_likes = %s, tweet_text_after = %s, tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s WHERE tweet_id = %s"
 
         cur = self.mysqlCon.cursor()
 
         try:
-            if date_time == '':
+            if retweets == -1:
                 cur.execute(sql, (tweet_id))
             else:
-                cur.execute(sql, (retweets, likes, tweet_id))
+                cur.execute(sql, (retweets, likes, text_after, ban_100, ban_1000, ban_3000, tweet_id))
 
             self.mysqlCon.commit()
 
             result = "Ok"
 
-        except ValueError:
-            result = ValueError + 'EXEPTION occurred!'
+        except:
+            result = sys.exc_info()[1] + 'EXEPTION occurred!'
 
         cur.close()
 

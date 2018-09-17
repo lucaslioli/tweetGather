@@ -95,7 +95,7 @@ def start_stream():
             myStream.filter(track=["Aldo Rebelo", "@aldorebelo", "Alvaro Dias", "@alvarodias_", "Ciro Gomes", "@cirogomes", "Cristovam Buarque", "@Sen_Cristovam", "José Maria Eymael", "@Eymaeloficial", "Fernando Collor", "@Collor", "Flavio Rocha", "@flaviogr", "Geraldo Alckmin", "@geraldoalckmin", "Guilherme Boulos", "@GuilhermeBoulos", "Henrique Meirelles", "@meirelles", "Jair Bolsonaro", "@jairbolsonaro", "João Amoêdo", "@joaoamoedonovo", "João Vicente Goulart", "@joaovgoulart64", "Levy Fidelix", "@levyfidelix", "Luiz Inácio Lula da Silva", "@LulapeloBrasil", "Manuela D'Ávila", "@ManuelaDavila", "Marina Silva", "@silva_marina", "Michel Temer", "@MichelTemer", "Paulo Rabello de Castro", "@PRabello", "Rodrigo Maia", "@RodrigoMaia", "Valéria Monteiro", "@mntvaleria", "Vera Lúcia", "@verapstu", "@77solidariedade", "@podemos_19", "@PDT_nacional", "@pps23", "@psdcnacional", "@PRB10", "@Rede45", "@psol50", "@MDB_Nacional", "@partidonovo30", "@PartidoPPL", "@prtboficial", "@ptbrasil", "@PCdoB_Oficial", "@pscnacional", "@democratas", "@pmn33nacional", "@pstu"])
         
         except:
-            message = 'ERROR: Exeption occurred!'
+            message = 'ERROR: Exeption occurred!' + sys.exc_info()[1]
 
             print(message)
             print("-----------------------------------------")

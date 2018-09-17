@@ -95,8 +95,8 @@ def start_stream():
             myStream = tweepy.streaming.Stream(auth, MyStreamListener())
             myStream.userstream(_with='followings')
         
-        except ValueError:
-            message = 'ERROR: Exeption occurred!' + ValueError
+        except:
+            message = 'ERROR: Exeption occurred!' + sys.exc_info()[1]
 
             print(message)
             print("-----------------------------------------")
