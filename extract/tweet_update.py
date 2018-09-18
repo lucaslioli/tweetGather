@@ -42,8 +42,12 @@ def calc_banality(text, lang):
 
 # Variables that contains the user credentials to access Twitter API
 if(len(sys.argv) < 2):
-    print ("Necessario indicar a conta de autenticação!")
-    exit(1)
+    try:
+        conn = DbConnecion()
+        conn.auto_update_tweet()
+        print("End.")
+    except:
+        print('EXEPTION: ', str(sys.exc_info()[1]))
 
 else:
     keys = api_tokens(sys.argv[1])
@@ -72,32 +76,36 @@ if __name__ == '__main__':
 
     for tw in tweets:
 
+        # Process de the tweet message to clean the text
+        text_after = text_cleaner(tw['txt'])
+
+        # Extracts the banality from the text processed for english language tweets
+        ban = calc_banality(text_after, tw['lang'])
+
         try:
             # Search for the original tweet by id
             original = api.get_status(tw['id'])
 
-            # Process de the tweet message to clean the text
-            text_after = text_cleaner(original.text)
-
-            # Extracts the banality from the text processed for english language tweets
-            ban = calc_banality(text_after, original.lang)
-
             # Update the information recorded in database
-            # conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count, text_after, ban['100'], ban['1000'], ban['3000'])
+            conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count, text_after, ban['100'], ban['1000'], ban['3000'])
 
-            print("\n", "Nº: ", i, tw['id'], "=>", original.created_at)
+            print("\n", "Nº => ", i, tw['id'])
             print(" RTs =>", original.retweet_count)
             print(" Likes =>", original.favorite_count)
-            print(" Text 1 =>", original.text.replace('\n', ' ').replace('\r', ''))
-            print(" Text 2 =>", text_after)
-            print(" Lang => ", original.lang)
-            print(" Banlity 100 =>", ban['100'], " | 1000 => ", ban['1000'], " | 3000 => ", ban['3000'])
             # print(" Replies: ", "=>", original.reply_count) # reply_count only for premium
         
         except:
-            conn.update_tweet(tw['id'])
+            conn.update_tweet(tw['id'], tw['retweets'], tw['likes'], text_after, ban['100'], ban['1000'], ban['3000'])
 
-            print("\n", "Nº: ", i, tw['id'], " ERRO: ", sys.exc_info()[1])
+            print("\n", "Nº => ", i, tw['id'], " ERRO: ", sys.exc_info()[1])
+            print(" RTs =>", tw['retweets'])
+            print(" Likes =>", tw['likes'])
+
+        print(" Text 1 =>", tw['txt'].replace('\n', ' ').replace('\r', ''))
+        print(" Text 2 =>", text_after)
+        print(" Lang => ", tw['lang'])
+        print(" Banlity 100 =>", ban['100'], " | 1000 => ", ban['1000'], " | 3000 => ", ban['3000'])
+        print("\n-------------------------------------------------------------------------------------------------------------------------")
 
         i -= 1
         time.sleep(0.5)

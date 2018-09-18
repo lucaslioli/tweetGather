@@ -1,3 +1,4 @@
+import sys
 import pymysql
 import pymysql.cursors
 
@@ -108,7 +109,7 @@ class DbConnecion(object):
             return False
 
     def tweet_list(self, where = ''):
-        sql = "SELECT tweet_id as id, tweet_text as txt, tweet_language as lang FROM tweet " + where
+        sql = "SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, tweet_retweets as retweets, tweet_likes as likes FROM tweet " + where
 
         cur = self.mysqlCon.cursor()
 
@@ -139,21 +140,14 @@ class DbConnecion(object):
 
         return result
 
-    def update_tweet(self, tweet_id, retweets = -1, likes = -1, text_after = '', ban_100 = -1, ban_1000 = -1, ban_3000 = -1):
-
-        if retweets == -1:
-            return 0
-            sql = "UPDATE tweet SET deleted = 1 WHERE tweet_id = %s"
-        else:
-            sql = "UPDATE tweet SET deleted = 0, tweet_retweets = %s, tweet_likes = %s, tweet_text_after = %s, tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s WHERE tweet_id = %s"
+    def update_tweet(self, tweet_id, deleted, retweets = -1, likes = -1, text_after = '', ban_100 = -1, ban_1000 = -1, ban_3000 = -1):
+            
+        sql = "UPDATE tweet SET deleted = %s, tweet_retweets = %s, tweet_likes = %s, tweet_text_after = %s, tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s WHERE tweet_id = %s"
 
         cur = self.mysqlCon.cursor()
 
         try:
-            if retweets == -1:
-                cur.execute(sql, (tweet_id))
-            else:
-                cur.execute(sql, (retweets, likes, text_after, ban_100, ban_1000, ban_3000, tweet_id))
+            cur.execute(sql, (deleted, retweets, likes, text_after, ban_100, ban_1000, ban_3000, tweet_id))
 
             self.mysqlCon.commit()
 
@@ -165,3 +159,14 @@ class DbConnecion(object):
         cur.close()
 
         return result
+
+    def auto_update_tweet(self):
+        cur = self.mysqlCon.cursor()
+
+        print("Updating usage of URLs...")
+        cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
+        cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
+
+        self.mysqlCon.commit()
+
+        cur.close()
