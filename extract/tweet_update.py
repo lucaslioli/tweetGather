@@ -18,13 +18,13 @@ def calc_banality(text, lang):
     
     for word in text.split():
         if(word in commonwords_100()):
-            ban_100 = +1
+            ban_100 += 1
 
         if(word in commonwords_1000()):
-            ban_1000 = +1
+            ban_1000 += 1
 
         if(word in commonwords_3000()):
-            ban_3000 = +1
+            ban_3000 += 1
 
     counter = len(text.split())
 
@@ -49,6 +49,8 @@ if(len(sys.argv) < 2):
     except:
         print('EXEPTION: ', str(sys.exc_info()[1]))
 
+    exit()
+
 else:
     keys = api_tokens(sys.argv[1])
     # Obtenção das chaves de atenticação da API
@@ -64,13 +66,12 @@ if __name__ == '__main__':
 
     # Autenticação com a API
     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
-    # Pega o usuário da conta seed
         
     conn = DbConnecion()
 
     # WHERE tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
     # Para atualizar todos: WHERE deleted = 0
-    tweets = conn.tweet_list("")
+    tweets = conn.tweet_list("WHERE tweet_language = 'en'")
 
     i = len(tweets)
 
@@ -87,17 +88,19 @@ if __name__ == '__main__':
             original = api.get_status(tw['id'])
 
             # Update the information recorded in database
-            conn.update_tweet(tw['id'], original.retweet_count, original.favorite_count, text_after, ban['100'], ban['1000'], ban['3000'])
+            cur = conn.update_tweet(tw['id'], 0, original.retweet_count, original.favorite_count, text_after, ban['100'], ban['1000'], ban['3000'])
+            print("\n Result: ", cur)
 
-            print("\n", "Nº => ", i, tw['id'])
+            print("\n Nº => ", i, tw['id'])
             print(" RTs =>", original.retweet_count)
             print(" Likes =>", original.favorite_count)
             # print(" Replies: ", "=>", original.reply_count) # reply_count only for premium
         
         except:
-            conn.update_tweet(tw['id'], tw['retweets'], tw['likes'], text_after, ban['100'], ban['1000'], ban['3000'])
+            cur = conn.update_tweet(tw['id'], 1, tw['retweets'], tw['likes'], text_after, ban['100'], ban['1000'], ban['3000'])
+            print("\n Result: ", cur)
 
-            print("\n", "Nº => ", i, tw['id'], " ERRO: ", sys.exc_info()[1])
+            print("\n Nº => ", i, tw['id'], " ERRO: ", sys.exc_info()[1])
             print(" RTs =>", tw['retweets'])
             print(" Likes =>", tw['likes'])
 

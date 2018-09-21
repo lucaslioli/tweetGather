@@ -109,7 +109,7 @@ class DbConnecion(object):
             return False
 
     def tweet_list(self, where = ''):
-        sql = "SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, tweet_retweets as retweets, tweet_likes as likes FROM tweet " + where
+        sql = "SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, tweet_retweets as retweets, tweet_likes as likes, deleted FROM tweet " + where
 
         cur = self.mysqlCon.cursor()
 
@@ -134,13 +134,14 @@ class DbConnecion(object):
             result = "Ok"
 
         except:
-            result = str(sys.exc_info()[1]) + 'EXEPTION occurred!'
+            result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
+            print(result)
 
         cur.close()
 
         return result
 
-    def update_tweet(self, tweet_id, deleted, retweets = -1, likes = -1, text_after = '', ban_100 = -1, ban_1000 = -1, ban_3000 = -1):
+    def update_tweet(self, tweet_id, deleted = 0, retweets = -1, likes = -1, text_after = '', ban_100 = -1, ban_1000 = -1, ban_3000 = -1):
             
         sql = "UPDATE tweet SET deleted = %s, tweet_retweets = %s, tweet_likes = %s, tweet_text_after = %s, tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s WHERE tweet_id = %s"
 
@@ -148,13 +149,13 @@ class DbConnecion(object):
 
         try:
             cur.execute(sql, (deleted, retweets, likes, text_after, ban_100, ban_1000, ban_3000, tweet_id))
-
+            
             self.mysqlCon.commit()
 
             result = "Ok"
 
         except:
-            result = str(sys.exc_info()[1]) + 'EXEPTION occurred!'
+            result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
 
         cur.close()
 
@@ -164,9 +165,36 @@ class DbConnecion(object):
         cur = self.mysqlCon.cursor()
 
         print("Updating usage of URLs...")
-        cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
-        cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
+        # cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
+        # cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
 
         self.mysqlCon.commit()
 
         cur.close()
+
+
+    def tweets_attr(self, rate, conf=0):
+        sql = """SELECT 
+                    t.tweet_text_after as txt,
+                    IF(t.tweet_polarity IS NOT NULL, CAST(t.tweet_polarity AS DEC(4,2)), 0.00) AS polarity,
+                    IF(t.tweet_url = 1, 'yes', 'no') as url, 
+                    IF(t.tweet_hashtag = 1, 'yes', 'no') as hashtag, 
+                    IF(t.tweet_RT = 1, 'yes', 'no') as RT, 
+                    t.tweet_size,
+                    IF(t.tweet_ban_3000 IS NOT NULL, CAST(t.tweet_ban_3000 AS DEC(4,2)), 0.00) AS banality,
+                    IF(((t.tweet_likes+t.tweet_retweets)/t.user_followers*100)>%s, 'yes', 'no') as popular
+                from tweet as t 
+                where t.tweet_language = 'en' and tweet_text_after is not null"""
+
+        if(conf):
+            sql = "SELECT popular, count(*) as count from (" + sql + ") as test group by popular"
+
+        cur = self.mysqlCon.cursor()
+
+        cur.execute(sql, rate)
+        
+        result = cur.fetchall()
+
+        cur.close()
+
+        return result
