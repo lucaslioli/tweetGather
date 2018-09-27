@@ -69,9 +69,9 @@ if __name__ == '__main__':
         
     conn = DbConnecion()
 
-    # WHERE tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
-    # Para atualizar todos: WHERE deleted = 0
-    tweets = conn.tweet_list("WHERE tweet_language = 'en'")
+    # WHERE tweet_language = 'en' AND tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
+    # Para atualizar todos em inglês: WHERE tweet_language = 'en'
+    tweets = conn.tweet_list("WHERE tweet_language = 'en' AND tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()")
 
     i = len(tweets)
 

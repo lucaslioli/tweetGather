@@ -7,7 +7,7 @@ class DbConnecion(object):
     mysqlCon = pymysql.connect(
         host        = '127.0.0.1', 
         user        = 'root', 
-        password    = '', 
+        password    = 'root', 
         db          = 'tweetgather', 
         charset     = 'utf8mb4', 
         cursorclass = pymysql.cursors.DictCursor
@@ -164,14 +164,54 @@ class DbConnecion(object):
     def auto_update_tweet(self):
         cur = self.mysqlCon.cursor()
 
-        print("Updating usage of URLs...")
-        # cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
-        # cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
+        try:
+            print("Updating usage of URLs...")
+            cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
+            cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
 
-        self.mysqlCon.commit()
+            print("Updating usage of Hashtags...")
+            cur.execute("UPDATE tweet SET tweet_hashtag = 0 WHERE tweet_text NOT LIKE '%#%'")
+            cur.execute("UPDATE tweet SET tweet_hashtag = 1 WHERE tweet_text LIKE '%#%'")
+
+            print("Updating tweets when they are retweets...")
+            cur.execute("UPDATE tweet SET tweet_RT = 0 WHERE tweet_text NOT LIKE 'RT @%'")
+            cur.execute("UPDATE tweet SET tweet_RT = 1 WHERE tweet_text LIKE 'RT @%'")
+
+            print("Updating thw size range of each tweet...")
+            cur.execute("UPDATE tweet SET tweet_size = 0 WHERE LENGTH(tweet_text) = 0")
+            cur.execute("UPDATE tweet SET tweet_size = 10 WHERE LENGTH(tweet_text) <= 10 AND LENGTH(tweet_text) > 0")
+            cur.execute("UPDATE tweet SET tweet_size = 20 WHERE LENGTH(tweet_text) <= 20 AND LENGTH(tweet_text) > 10")
+            cur.execute("UPDATE tweet SET tweet_size = 30 WHERE LENGTH(tweet_text) <= 30 AND LENGTH(tweet_text) > 20")
+            cur.execute("UPDATE tweet SET tweet_size = 40 WHERE LENGTH(tweet_text) <= 40 AND LENGTH(tweet_text) > 30")
+            cur.execute("UPDATE tweet SET tweet_size = 50 WHERE LENGTH(tweet_text) <= 50 AND LENGTH(tweet_text) > 40")
+            cur.execute("UPDATE tweet SET tweet_size = 60 WHERE LENGTH(tweet_text) <= 60 AND LENGTH(tweet_text) > 50")
+            cur.execute("UPDATE tweet SET tweet_size = 70 WHERE LENGTH(tweet_text) <= 70 AND LENGTH(tweet_text) > 60")
+            cur.execute("UPDATE tweet SET tweet_size = 80 WHERE LENGTH(tweet_text) <= 80 AND LENGTH(tweet_text) > 70")
+            cur.execute("UPDATE tweet SET tweet_size = 90 WHERE LENGTH(tweet_text) <= 90 AND LENGTH(tweet_text) > 80")
+            cur.execute("UPDATE tweet SET tweet_size = 100 WHERE LENGTH(tweet_text) <= 100 AND LENGTH(tweet_text) > 90")
+            cur.execute("UPDATE tweet SET tweet_size = 110 WHERE LENGTH(tweet_text) <= 110 AND LENGTH(tweet_text) > 100")
+            cur.execute("UPDATE tweet SET tweet_size = 120 WHERE LENGTH(tweet_text) <= 120 AND LENGTH(tweet_text) > 110")
+            cur.execute("UPDATE tweet SET tweet_size = 130 WHERE LENGTH(tweet_text) <= 130 AND LENGTH(tweet_text) > 120")
+            cur.execute("UPDATE tweet SET tweet_size = 140 WHERE LENGTH(tweet_text) <= 140 AND LENGTH(tweet_text) > 130")
+            cur.execute("UPDATE tweet SET tweet_size = 150 WHERE LENGTH(tweet_text) <= 150 AND LENGTH(tweet_text) > 140")
+            cur.execute("UPDATE tweet SET tweet_size = 160 WHERE LENGTH(tweet_text) <= 160 AND LENGTH(tweet_text) > 150")
+            cur.execute("UPDATE tweet SET tweet_size = 170 WHERE LENGTH(tweet_text) <= 170 AND LENGTH(tweet_text) > 160")
+            cur.execute("UPDATE tweet SET tweet_size = 180 WHERE LENGTH(tweet_text) <= 180 AND LENGTH(tweet_text) > 170")
+            cur.execute("UPDATE tweet SET tweet_size = 190 WHERE LENGTH(tweet_text) <= 190 AND LENGTH(tweet_text) > 180")
+            cur.execute("UPDATE tweet SET tweet_size = 200 WHERE LENGTH(tweet_text) <= 200 AND LENGTH(tweet_text) > 190")
+            cur.execute("UPDATE tweet SET tweet_size = 210 WHERE LENGTH(tweet_text) <= 210 AND LENGTH(tweet_text) > 200")
+            cur.execute("UPDATE tweet SET tweet_size = 210 WHERE LENGTH(tweet_text) <= 210 AND LENGTH(tweet_text) > 210")
+            cur.execute("UPDATE tweet SET tweet_size = 230 WHERE LENGTH(tweet_text) <= 230 AND LENGTH(tweet_text) > 220")
+            cur.execute("UPDATE tweet SET tweet_size = 240 WHERE LENGTH(tweet_text) <= 240 AND LENGTH(tweet_text) > 230")
+            cur.execute("UPDATE tweet SET tweet_size = 250 WHERE LENGTH(tweet_text) <= 250 AND LENGTH(tweet_text) > 240")
+            cur.execute("UPDATE tweet SET tweet_size = 255 WHERE LENGTH(tweet_text) <= 255 AND LENGTH(tweet_text) > 250")
+
+            self.mysqlCon.commit()
+
+        except:
+            print('EXEPTION occurred! ' + str(sys.exc_info()[1]))
 
         cur.close()
-
 
     def tweets_attr(self, rate, conf=0):
         sql = """SELECT 
