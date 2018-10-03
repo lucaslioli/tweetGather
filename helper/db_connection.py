@@ -238,7 +238,7 @@ class DbConnecion(object):
 
         cur.close()
 
-    def tweets_attr(self, rate, conf=0):
+    def tweets_attr(self, rate, counter=0):
         sql = """SELECT 
                     t.tweet_text_after as txt,
                     IF(t.tweet_polarity IS NOT NULL, CAST(t.tweet_polarity AS DEC(4,2)), 0.00) AS polarity,
@@ -251,8 +251,8 @@ class DbConnecion(object):
                 from tweet as t 
                 where t.tweet_language = 'en' and tweet_text_after is not null"""
 
-        if(conf):
-            sql = "SELECT popular, count(*) as count from (" + sql + ") as test group by popular"
+        if(counter):
+            sql = "SELECT popular, count(*) as count from (" + sql + ") as test group by popular order by popular"
 
         cur = self.mysqlCon.cursor()
 

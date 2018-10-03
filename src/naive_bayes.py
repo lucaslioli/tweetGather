@@ -14,15 +14,18 @@ from db_connection import DbConnecion
 # Credits for the help in Naive Bayes algorithm implementation for:
 # https://pythonmachinelearning.pro/text-classification-tutorial-with-naive-bayes/
 
-def get_data(conference):
+def get_data():
     conn = DbConnecion()
 
     # Get all the tweets with the attributes
-    tweets = conn.tweets_attr(rate, conference)
+    tweets = conn.tweets_attr(rate)
 
-    if(conference):
-        print(tweets)
-        exit()
+    # Get the number of popular and unpopular tweets considering the rate
+    popular = conn.tweets_attr(rate, 1)
+    
+    pop = []
+    pop.append(popular[0]["count"]) # Number of popular tweets considering the rate
+    pop.append(popular[1]["count"]) # Number of unpopular tweets considering the rate
     
     # Shuffle the list of tweets
     np.random.shuffle(tweets)
@@ -33,7 +36,7 @@ def get_data(conference):
         data.append(tw['txt'])
         target.append(tw['popular'])
 
-    return data, target
+    return data, target, pop
 
 class PopularDetector(object):
     """Implementation of Naive Bayes for binary classification"""
@@ -108,22 +111,18 @@ class PopularDetector(object):
         
 
 if __name__ == '__main__':
-    # When conf = 1, the function will return the number for each label
     # rate is the minimum value of engagement rate to consider an tweet as popular
     if(len(sys.argv) < 2):
         rate = 0.02
-        conf = 0
-    elif(len(sys.argv) < 3):
-        rate = float(sys.argv[1])
-        conf = 0
     else:
         rate = float(sys.argv[1])
-        conf = float(sys.argv[2])
     
-    attr, label = get_data(conf)
+    attr, label, popular = get_data()
 
     print(" Engagement Rate:", (rate*100), "%")
     print(" Total of Tweets:", len(attr), "\n")
+
+    print(" Popular:", popular[1], "\t\tUnpopular:", popular[0], "\n")
 
     # Divide the tweets into train and test lists
     attr_train, attr_test, label_train, label_test = train_test_split(attr, label, test_size=0.20, random_state=42)
@@ -139,6 +138,12 @@ if __name__ == '__main__':
     true = label_test
 
     accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i]) / float(len(pred))
-    print(" Accuracy: ", "{0:.4f}".format(accuracy))
+    pop_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 1) / sum(1 for i in range(len(pred)) if true[i] == 1)
+    unp_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 0) / sum(1 for i in range(len(pred)) if true[i] == 0)
 
-    print("\n Confusion Matrix: \n",confusion_matrix(label_test, pred))
+    print("---------------- Accuracy ----------------")
+    print(" |General", "\t|Popular", "\t|Unpopular")
+    print(" |{0:.4f}".format(accuracy), "\t|{0:.4f}".format(pop_accuracy), "\t|{0:.4f}".format(unp_accuracy))
+
+    print("\nConfusion Matrix: \n")
+    print(confusion_matrix(label_test, pred))
