@@ -1,4 +1,5 @@
 import re
+import emoji                                    # Remove all emojis from the texts
 import string                                   # Remove the ponctuation from the texts
 import unicodedata                              # Remove the accents from the texts
 from nltk.corpus import stopwords               # Methods to remove stop words
@@ -13,6 +14,8 @@ def text_cleaner(text):
         u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
         u"\U00002702-\U000027B0"
         u"\U000024C2-\U0001F251"
+        u"\U0001f926-\U0001f937"
+        u"\u2640-\u2642" 
         u"\xf0\x9f\x98\x86"
         u"\xe2\x80\xa6"
         u"\u2026"
@@ -31,6 +34,9 @@ def text_cleaner(text):
     # Removes the line breaks
     text = text.replace('\n', ' ').replace('\r', '')
 
+    # To remove special characters identified later
+    text = text.replace('“', '').replace('”', '')
+
     # To make the text minuscule
     text = text.lower()
 
@@ -44,6 +50,7 @@ def text_cleaner(text):
     text = ' '.join(w for w in text.split() if len(''.join(c for c in w if c != w[0]))>1)
 
     # To remove the emojis from the text
+    text = emoji.get_emoji_regexp().sub(r'', text)
     text = emoji_pattern.sub(r'', text)
 
     # To remove the stop words from the text

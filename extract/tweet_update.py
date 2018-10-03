@@ -7,6 +7,9 @@ from db_connection import DbConnecion
 from text_processing import text_cleaner
 from dictionary import *
 
+# Para filtrar por periodo: WHERE tweet_language = 'en' AND tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
+# Para atualizar todos em inglês: WHERE tweet_language = 'en'
+QUERY = "WHERE tweet_language = 'en'"
 
 def calc_banality(text, lang):
     if(lang != 'en'):
@@ -44,8 +47,20 @@ def calc_banality(text, lang):
 if(len(sys.argv) < 2):
     try:
         conn = DbConnecion()
+
+        tweets = conn.tweet_list(QUERY)
+
+        print("Cleaning and updating all the messages...")
+        for tw in tweets:
+            # Process de the tweet message to clean the text
+            text_after = text_cleaner(tw['txt'])
+
+            cur = conn.update_tweet(tw['id'], text_after)
+
         conn.auto_update_tweet()
+
         print("End.")
+
     except:
         print('EXEPTION: ', str(sys.exc_info()[1]))
 
@@ -69,9 +84,7 @@ if __name__ == '__main__':
         
     conn = DbConnecion()
 
-    # WHERE tweet_language = 'en' AND tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
-    # Para atualizar todos em inglês: WHERE tweet_language = 'en'
-    tweets = conn.tweet_list("WHERE tweet_language = 'en' AND tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()")
+    tweets = conn.tweet_list(QUERY)
 
     i = len(tweets)
 
@@ -111,6 +124,6 @@ if __name__ == '__main__':
         print("\n-------------------------------------------------------------------------------------------------------------------------")
 
         i -= 1
-        time.sleep(0.5)
+        time.sleep(0.8)
 
     print("\n")

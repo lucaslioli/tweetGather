@@ -161,10 +161,35 @@ class DbConnecion(object):
 
         return result
 
+    def update_tweet_text(self, tweet_id, text_after = ''):
+        if(text_after == ''):
+            return "--"
+
+        sql = "UPDATE tweet SET deleted = %s, tweet_retweets = %s, tweet_likes = %s, tweet_text_after = %s, tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s WHERE tweet_id = %s"
+
+        cur = self.mysqlCon.cursor()
+
+        try:
+            cur.execute(sql, (text_after, tweet_id))
+            
+            self.mysqlCon.commit()
+
+            result = "Ok"
+
+        except:
+            result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
+
+        cur.close()
+
+        return result
+
     def auto_update_tweet(self):
         cur = self.mysqlCon.cursor()
 
         try:
+            print("Updating tweet text to remove the borring emoji...")
+            cur.execute("UPDATE tweet SET tweet_text_after = REPLACE(tweet_text_after, '⃣', '') WHERE tweet_text_after like '%⃣%'")
+
             print("Updating usage of URLs...")
             cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
             cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
@@ -177,7 +202,7 @@ class DbConnecion(object):
             cur.execute("UPDATE tweet SET tweet_RT = 0 WHERE tweet_text NOT LIKE 'RT @%'")
             cur.execute("UPDATE tweet SET tweet_RT = 1 WHERE tweet_text LIKE 'RT @%'")
 
-            print("Updating thw size range of each tweet...")
+            print("Updating the size range of each message...")
             cur.execute("UPDATE tweet SET tweet_size = 0 WHERE LENGTH(tweet_text) = 0")
             cur.execute("UPDATE tweet SET tweet_size = 10 WHERE LENGTH(tweet_text) <= 10 AND LENGTH(tweet_text) > 0")
             cur.execute("UPDATE tweet SET tweet_size = 20 WHERE LENGTH(tweet_text) <= 20 AND LENGTH(tweet_text) > 10")
@@ -217,12 +242,12 @@ class DbConnecion(object):
         sql = """SELECT 
                     t.tweet_text_after as txt,
                     IF(t.tweet_polarity IS NOT NULL, CAST(t.tweet_polarity AS DEC(4,2)), 0.00) AS polarity,
-                    IF(t.tweet_url = 1, 'yes', 'no') as url, 
-                    IF(t.tweet_hashtag = 1, 'yes', 'no') as hashtag, 
-                    IF(t.tweet_RT = 1, 'yes', 'no') as RT, 
+                    IF(t.tweet_url = 1, 1, 0) as url, 
+                    IF(t.tweet_hashtag = 1, 1, 0) as hashtag, 
+                    IF(t.tweet_RT = 1, 1, 0) as RT, 
                     t.tweet_size,
                     IF(t.tweet_ban_3000 IS NOT NULL, CAST(t.tweet_ban_3000 AS DEC(4,2)), 0.00) AS banality,
-                    IF(((t.tweet_likes+t.tweet_retweets)/t.user_followers*100)>%s, 'yes', 'no') as popular
+                    IF(((t.tweet_likes+t.tweet_retweets)/t.user_followers*100)>%s, 1, 0) as popular
                 from tweet as t 
                 where t.tweet_language = 'en' and tweet_text_after is not null"""
 
