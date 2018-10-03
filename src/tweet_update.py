@@ -2,6 +2,7 @@ import sys
 import tweepy
 import time
 
+sys.path.append('../helper')
 from authenticate import api_tokens
 from db_connection import DbConnecion
 from text_processing import text_cleaner

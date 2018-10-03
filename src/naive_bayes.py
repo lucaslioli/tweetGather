@@ -8,9 +8,11 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 
+sys.path.append('../helper')
 from db_connection import DbConnecion
 
-target_names = ['popular', 'unpopular']
+# Credits for the help in Naive Bayes algorithm implementation for:
+# https://pythonmachinelearning.pro/text-classification-tutorial-with-naive-bayes/
 
 def get_data(conference):
     conn = DbConnecion()

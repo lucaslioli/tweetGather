@@ -3,6 +3,8 @@ import tweepy
 import datetime
 
 from textblob import TextBlob
+
+sys.path.append('../helper')
 from authenticate import api_tokens
 from db_connection import DbConnecion
 from log import logfile
