@@ -10,33 +10,7 @@ from sklearn.metrics import confusion_matrix
 
 sys.path.append('./helper')
 from db_connection import DbConnecion
-
-# Credits for the help in Naive Bayes algorithm implementation for:
-# https://pythonmachinelearning.pro/text-classification-tutorial-with-naive-bayes/
-
-def get_data():
-    conn = DbConnecion()
-
-    # Get all the tweets with the attributes
-    tweets = conn.tweets_attr(rate)
-
-    # Get the number of popular and unpopular tweets considering the rate
-    popular = conn.tweets_attr(rate, 0, 1)
-
-    pop = []
-    pop.append(popular[0]["count"]) # Number of popular tweets considering the rate
-    pop.append(popular[1]["count"]) # Number of unpopular tweets considering the rate
-
-    # Shuffle the list of tweets
-    np.random.shuffle(tweets)
-
-    data, target = [], []
-
-    for tw in tweets:
-        data.append(tw['txt'])
-        target.append(tw['popular'])
-
-    return data, target, pop
+from prepare_dataset import get_data
 
 class PopularDetector(object):
     """Implementation of Naive Bayes for binary classification"""
@@ -116,9 +90,9 @@ if __name__ == '__main__': # COMPILE WITH: python3 naive_bayes.py RATE
     else:
         rate = float(sys.argv[1])
 
-    attr, label, popular = get_data()
+    attr, label, popular = get_data(rate, 0, 1)
 
-    print(" Engagement Rate:", (rate*100), "%")
+    print("\n Engagement Rate:", (rate*100), "%")
     print(" Total of Tweets:", len(attr), "\n")
 
     print(" Popular:", popular[1], "\t\tUnpopular:", popular[0], "\n")

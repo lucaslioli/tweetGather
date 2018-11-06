@@ -229,7 +229,7 @@ class DbConnecion(object):
                 FROM tweet as t
                 WHERE t.tweet_language = 'en'
                     AND tweet_text_after != ''
-                    AND user_followers > 1000000"""
+                    AND user_followers > 10000"""
 
         if(user != 0):
             sql = sql + " AND t.user_id = %s"
