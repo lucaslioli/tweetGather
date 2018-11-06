@@ -111,3 +111,5 @@ logfile.txt
 
 t.txt
 \.vscode/
+
+*.arff
