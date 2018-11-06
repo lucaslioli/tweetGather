@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 
-sys.path.append('../helper')
+sys.path.append('./helper')
 from db_connection import DbConnecion
 
 # Credits for the help in Naive Bayes algorithm implementation for:
@@ -21,12 +21,12 @@ def get_data():
     tweets = conn.tweets_attr(rate)
 
     # Get the number of popular and unpopular tweets considering the rate
-    popular = conn.tweets_attr(rate, 1)
-    
+    popular = conn.tweets_attr(rate, 0, 1)
+
     pop = []
     pop.append(popular[0]["count"]) # Number of popular tweets considering the rate
     pop.append(popular[1]["count"]) # Number of unpopular tweets considering the rate
-    
+
     # Shuffle the list of tweets
     np.random.shuffle(tweets)
 
@@ -92,7 +92,7 @@ class PopularDetector(object):
             ham_score = 0
             for word, _ in counts.items():
                 if word not in self.vocab: continue
-                
+
                 # add Laplace smoothing
                 log_w_given_spam = math.log( (self.word_counts['spam'].get(word, 0.0) + 1) / (self.num_messages['spam'] + len(self.vocab)) )
                 log_w_given_ham = math.log( (self.word_counts['ham'].get(word, 0.0) + 1) / (self.num_messages['ham'] + len(self.vocab)) )
@@ -108,15 +108,14 @@ class PopularDetector(object):
             else:
                 result.append(0)
         return result
-        
 
-if __name__ == '__main__':
-    # rate is the minimum value of engagement rate to consider an tweet as popular
+if __name__ == '__main__': # COMPILE WITH: python3 naive_bayes.py RATE
+
     if(len(sys.argv) < 2):
-        rate = 0.02
+        rate = 0.02 # The minimum value of engagement rate to consider an tweet as popular
     else:
         rate = float(sys.argv[1])
-    
+
     attr, label, popular = get_data()
 
     print(" Engagement Rate:", (rate*100), "%")
@@ -125,11 +124,19 @@ if __name__ == '__main__':
     print(" Popular:", popular[1], "\t\tUnpopular:", popular[0], "\n")
 
     # Divide the tweets into train and test lists
-    attr_train, attr_test, label_train, label_test = train_test_split(attr, label, test_size=0.20, random_state=42)
+    attr_train, attr_test, label_train, label_test = train_test_split(attr, label, test_size=0.40, random_state=42)
 
     # print(*attr_test, sep='\n')
-    print(" Attr Train:", len(attr_train), "\tLabel Train:", len(label_train), "\t80% \n",
-        "Attr Test:", len(attr_test), "\tLabel Test:", len(label_test), "\t20% \n")
+    print(" Attr Train:", len(attr_train), "\tLabel Train:", len(label_train), "\t60% \n",
+        "Attr Test:", len(attr_test), "\tLabel Test:", len(label_test), "\t40% \n")
+
+    count_pop_train = sum(1 for i in range(len(label_train)) if label_train[i] == 1)
+    count_unpop_train = (len(label_train) - count_pop_train)
+    count_pop_test = sum(1 for i in range(len(label_test)) if label_train[i] == 0)
+    count_unpop_test = (len(label_test) - count_pop_test)
+
+    print(" Popular Train:", count_pop_train, "\tUnpopular Train:", count_unpop_train, "\n",
+        "Popular Test:", count_pop_test, "\tUnpopular Test:", count_unpop_test, "\n")
 
     MNB = PopularDetector()
     MNB.fit(attr_train, label_train)

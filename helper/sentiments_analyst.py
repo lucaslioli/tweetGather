@@ -9,7 +9,7 @@ i = len(tweets)
 
 for tw in tweets:
     text = TextBlob(tw['txt'])
-    
+
     if tw['lang'] != 'en':
         try:
             text = TextBlob(str(text.translate(to='en')))
