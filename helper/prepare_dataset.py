@@ -32,7 +32,7 @@ def get_data(rate, user = 0, getText = 0):
 
     for tw in tweets:
 
-        if((count_pop == max_class and tw['popular'] == 1) or 
+        if((count_pop == max_class and tw['popular'] == 1) or
             (count_unpop == max_class and tw['popular'] == 0)):
             continue
 
@@ -96,7 +96,10 @@ if __name__ == '__main__': # COMPILE WITH: python3 prepare_dataset.py RATE USEFO
 
     # Records ARFF file for using at Weka
     if(args['useFor'] == "weka"):
-        f = open(str(args['rate']) + "_" + str(args['user']) +'.arff','w')
+        if not os.path.exists("ARFF"):
+            os.makedirs("ARFF")
+
+        f = open("ARFF/" + str(args['rate']) + "_" + str(args['user']) +'.arff','w')
 
         f.write("@RELATION tweetGather\n\n")
 
