@@ -83,19 +83,20 @@ class PopularDetector(object):
                 result.append(0)
         return result
 
-if __name__ == '__main__': # COMPILE WITH: python3 naive_bayes.py RATE
+if __name__ == '__main__': # COMPILE WITH: python3 naive_bayes.py RATE USER
 
-    if(len(sys.argv) < 2):
-        rate = 0.02 # The minimum value of engagement rate to consider an tweet as popular
+    arg_names = ['command','rate', 'user']
+    args = dict(zip(arg_names, sys.argv))
+
+    if('rate' not in args):
+        args['rate'] = 0.02 # Minimum value of engagement rate to consider an tweet as popular
     else:
-        rate = float(sys.argv[1])
+        args['rate'] = float(args['rate'])
 
-    attr, label, popular = get_data(rate, 0, 1)
+    if('user' not in args):
+        args['user'] = 0 # The ID of specific user author
 
-    print("\n Engagement Rate:", (rate*100), "%")
-    print(" Total of Tweets:", len(attr), "\n")
-
-    print(" Popular:", popular[1], "\t\tUnpopular:", popular[0], "\n")
+    attr, label, popular = get_data(args['rate'], args['user'], 1)
 
     # Divide the tweets into train and test lists
     attr_train, attr_test, label_train, label_test = train_test_split(attr, label, test_size=0.40, random_state=42)

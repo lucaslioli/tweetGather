@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 from db_connection import DbConnecion
 
 def get_data(rate, user = 0, getText = 0):
+    print("\n Engagement Rate:", (rate*100), "%")
+
     conn = DbConnecion()
 
     # Get all the tweets with the attributes
@@ -59,6 +61,12 @@ def get_data(rate, user = 0, getText = 0):
         if(len(target) == max_class*2):
             break
 
+    print(" Total of tweets:", (n_pop[0] + n_pop[1]), "\t\tTotal used: ", len(target), "\n")
+
+    print(" Total of Popular:", n_pop[1], "\tUnpopular:", n_pop[0])
+
+    print(" Balanced Popular:", count_pop, "\tUnpopular:", count_unpop, "\n")
+
     return data, target, n_pop
 
 if __name__ == '__main__': # COMPILE WITH: python3 prepare_dataset.py RATE USEFOR USER GETTEXT
@@ -83,23 +91,14 @@ if __name__ == '__main__': # COMPILE WITH: python3 prepare_dataset.py RATE USEFO
     # Data attributes, label classes, number of each class
     attr, label, n_pop = get_data(args['rate'], args['user'], args['getText'])
 
-    # Print useful information
-    print("\n Engagement Rate:", (args['rate']*100), "%")
-    print(" Total of tweets:", (n_pop[0] + n_pop[1]), "\t\tTotal used: ", len(attr), "\n")
-
-    print(" Total of Popular:", n_pop[1], "\tUnpopular:", n_pop[0])
-
-    count_pop = sum(1 for i in range(len(label)) if label[i] == 1)
-    count_unpop = (len(label) - count_pop)
-
-    print(" Balanced Popular:", count_pop, "\tUnpopular:", count_unpop, "\n")
-
     # Records ARFF file for using at Weka
     if(args['useFor'] == "weka"):
         if not os.path.exists("ARFF"):
             os.makedirs("ARFF")
 
-        f = open("ARFF/" + str(args['rate']) + "_" + str(args['user']) +'.arff','w')
+        file_name = "user_" + str(args['user']) + "_rate_" + str(args['rate']) +'.arff'
+
+        f = open("ARFF/"+file_name,'w')
 
         f.write("@RELATION tweetGather\n\n")
 
@@ -122,4 +121,4 @@ if __name__ == '__main__': # COMPILE WITH: python3 prepare_dataset.py RATE USEFO
 
         f.close()
 
-        print(" ARFF File generated!\n")
+        print(" ARFF File generated: " + file_name + "\n")
