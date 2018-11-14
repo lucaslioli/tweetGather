@@ -8,6 +8,7 @@ from db_connection import DbConnecion
 
 def get_data(rate, user = 0, getText = 0):
     print("\n Engagement Rate:", (rate*100), "%")
+    print(" User:", user)
 
     conn = DbConnecion()
 
@@ -93,12 +94,12 @@ if __name__ == '__main__': # COMPILE WITH: python3 prepare_dataset.py RATE USEFO
 
     # Records ARFF file for using at Weka
     if(args['useFor'] == "weka"):
-        if not os.path.exists("ARFF"):
-            os.makedirs("ARFF")
+        if not os.path.exists("ARFF/"+ str(args['user'])):
+            os.makedirs("ARFF/"+ str(args['user']))
 
         file_name = "user_" + str(args['user']) + "_rate_" + str(args['rate']) +'.arff'
 
-        f = open("ARFF/"+file_name,'w')
+        f = open("ARFF/"+ str(args['user']) + "/" +file_name,'w')
 
         f.write("@RELATION tweetGather\n\n")
 

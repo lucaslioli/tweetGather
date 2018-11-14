@@ -232,7 +232,7 @@ class DbConnecion(object):
                     AND user_followers > 10000"""
 
         if(user != 0):
-            sql = sql + " AND t.user_id = %s"
+            sql = sql + " AND t.user_id = %s "
 
         if(counter):
             sql = "SELECT popular, count(*) as count from (" + sql + ") as test group by popular order by popular"
@@ -240,7 +240,7 @@ class DbConnecion(object):
         cur = self.mysqlCon.cursor()
 
         if(user != 0):
-            cur.execute(sql, rate, user)
+            cur.execute(sql, (rate, user))
         else:
             cur.execute(sql, rate)
 
