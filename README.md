@@ -6,7 +6,7 @@ Para instalação dos requisitos necessários utilizar um dos comandos:
 $ pip3 install -r requirements.txt
 $ pip2 freeze > requirements.txt
 ```
-
+---
 ## Projeto (TG): Utilização de algoritmos de aprendizado de máquina para prever a popularidade de tuítes
 **Title:** Use of machine learning algorithms to predict tweets popularity
 
