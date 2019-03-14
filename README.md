@@ -28,4 +28,4 @@ $ pip2 freeze > requirements.txt
 **Premiação:** Melhor artigo de pesquisa do evento
 
 **Arquitetura do projeto**
-![logo](https://raw.githubusercontent.com/lucaslioli/tweetGather/master/graph/assets/arquitetura.png)
+![IMG](https://raw.githubusercontent.com/lucaslioli/tweetGather/master/display/assets/arquitetura.png)
