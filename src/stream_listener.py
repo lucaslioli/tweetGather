@@ -32,7 +32,7 @@ class MyStreamListener(tweepy.StreamListener):
         message = "INSERT tweet " + str(status.id) + " for user " + status.author.name
         logfile(message)
 
-        return False; # Don't kill the stream
+        return False # Don't kill the stream
 
     def on_error(self, status_code):
         message = 'Encountered error with status code:' + str(status_code)
