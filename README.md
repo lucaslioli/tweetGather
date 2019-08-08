@@ -31,8 +31,8 @@ def api_tokens(verify):
   keys = {}
   if(verify == "Gather"):
     keys['consumer_key']        = "consumer_key"
-    keys['consumer_secret'] 	  = "consumer_secret"
-    keys['access_token'] 		    = "access_token"
+    keys['consumer_secret']     = "consumer_secret"
+    keys['access_token']        = "access_token"
     keys['access_token_secret'] = "access_token_secret"
 
     return keys
