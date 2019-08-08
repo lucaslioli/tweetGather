@@ -17,7 +17,7 @@ Maiores detalhes sobre a utilização dos algoritmos e resultados obtidos podem 
 
 ## Requisitos
 
-Para instalação dos requisitos necessários utilizar um dos comandos:
+Para instalação dos requisitos necessários utilizar o comando:
 
 ```
 $ pip3 install -r requirements.txt
