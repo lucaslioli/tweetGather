@@ -21,7 +21,6 @@ Para instalação dos requisitos necessários utilizar um dos comandos:
 
 ```
 $ pip3 install -r requirements.txt
-$ pip2 freeze > requirements.txt
 ```
 
 Criar conta na plataforma [Twitter Developers](https://developer.twitter.com/en.html) e gerar as chaves e tokens de acesso. Criar um arquivo ```helper/authenticate.py``` com a seguinte estrutura:
