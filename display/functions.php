@@ -39,7 +39,7 @@ function rodape(){
  * @param  string $senha Senha
  * @return [type]        [description]
  */
-function db_connect($base = 'tweetgather', $senha=""){
+function db_connect($base = 'tweetgather', $senha="321"){
     try{
         $conn = new PDO('mysql:host=localhost;dbname='.$base, "root", $senha);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -113,7 +113,7 @@ function searchGraphData($id, $table="tweet", $order_by="tweet_id", $sentiment =
 
         if($id != 0){
             if($table == "tweet"){
-                $query = $conn->query("SELECT user_followers_diff as diff, IF(tweet_datetime, DATE_FORMAT(tweet_datetime, '%Y/%m/%d'),'!/!') as date_time, tweet_polarity as polarity, tweet_retweets as retweets, tweet_likes as likes FROM tweet WHERE user_id=".$id." ORDER BY tweet_id");
+                $query = $conn->query("SELECT user_followers_diff as diff, IF(tweet_datetime, DATE_FORMAT(tweet_datetime, '%Y/%m/%d'),'!/!') as date_time, tweet_polarity as polarity, tweet_retweets as retweets, tweet_likes as likes FROM tweet WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000 AND user_id=$id ORDER BY tweet_id");
 
                 if($sentiment)
                     $dados = [['Date','Sentiment']];
@@ -123,7 +123,7 @@ function searchGraphData($id, $table="tweet", $order_by="tweet_id", $sentiment =
                     $dados = [['Date','Difference']];
             
             }else if($table == "user_followers_history"){
-                $query = $conn->query("SELECT t.difference, IF(date_time, DATE_FORMAT(date_time, '%Y/%m/%d'),'!/!') as date_time FROM ".$table." as t WHERE user_id=".$id." ORDER BY ".$order_by);
+                $query = $conn->query("SELECT t.difference, IF(date_time, DATE_FORMAT(date_time, '%Y/%m/%d'),'!/!') as date_time FROM $table as t WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000 AND user_id=".$id." ORDER BY $order_by");
                 
                 $dados = [['Date','Difference']];
             
@@ -168,7 +168,8 @@ function sentimentByRetweets($userId = NULL){
         $conn = db_connect();
         if($conn === false) return false;
 
-        $where = ($userId != NULL) ? 'where t1.user_id = '.$userId : "";
+        $where = "WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000";
+        $where .= ($userId != NULL) ? ' AND t1.user_id = '.$userId : "";
 
         $query = $conn->query("SELECT 
                 DISTINCT FORMAT(t1.tweet_polarity, 1) as sentiment,
@@ -204,7 +205,8 @@ function banalityByRetweets($banality = "1000", $userId = NULL){
         $conn = db_connect();
         if($conn === false) return false;
 
-        $where = ($userId != NULL) ? 'where t1.user_id = '.$userId : "";
+        $where = "WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000";
+        $where .= ($userId != NULL) ? ' AND t1.user_id = '.$userId : "";
 
         $query = $conn->query("SELECT 
                 DISTINCT FORMAT(t1.tweet_ban_$banality, 1) as banality,
@@ -239,7 +241,8 @@ function sizeByRetweets($userId = NULL){
         $conn = db_connect();
         if($conn === false) return false;
 
-        $where = ($userId != NULL) ? 'where t1.user_id = '.$userId : "";
+        $where = "WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000";
+        $where .= ($userId != NULL) ? ' AND t1.user_id = '.$userId : "";
 
         $query = $conn->query("SELECT 
                 DISTINCT t1.tweet_size, concat((t1.tweet_size - 10), ' - ', t1.tweet_size) as size, 
@@ -273,7 +276,8 @@ function urlByRetweets($userId = NULL){
         $conn = db_connect();
         if($conn === false) return false;
 
-        $where = ($userId != NULL) ? 'where t1.user_id = '.$userId : "";
+        $where = "WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000";
+        $where .= ($userId != NULL) ? ' AND t1.user_id = '.$userId : "";
 
         $query = $conn->query("SELECT 
                 DISTINCT t1.tweet_url, if(t1.tweet_url, 'With URL', 'Without URL') as url, 
@@ -308,7 +312,8 @@ function hashtagByRetweets($userId = NULL){
         $conn = db_connect();
         if($conn === false) return false;
 
-        $where = ($userId != NULL) ? 'where t1.user_id = '.$userId : "";
+        $where = "WHERE tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000";
+        $where .= ($userId != NULL) ? ' AND t1.user_id = '.$userId : "";
 
         $query = $conn->query("SELECT 
                 DISTINCT t1.tweet_hashtag, if(t1.tweet_hashtag, 'With Hashtag', 'Without Hashtag') as hashtag, 
@@ -344,7 +349,7 @@ function tweetList($userId = NULL){
 
         $where = ($userId != NULL) ? 'and t1.user_id = '.$userId : "";
 
-        $query = $conn->query("SELECT * from tweet as t1 where t1.tweet_RT = 0 and t1.tweet_language = 'en' $where");
+        $query = $conn->query("SELECT * from tweet as t1 where t1.tweet_RT = 0 and t1.tweet_language = 'en' AND tweet_text_after != '' AND user_followers > 10000 $where");
         $dados = [];
 
         while($row = $query->fetch(PDO::FETCH_OBJ))
@@ -368,7 +373,7 @@ function allUsers(){
         $conn = db_connect();
         if($conn === false) return false;
 
-        $query = $conn->query("SELECT * FROM user ORDER BY user_name");
+        $query = $conn->query("SELECT * FROM user WHERE user_language = 'en' and user_id in (select user_id from tweet where tweet_text_after != '' AND user_followers > 10000) ORDER BY user_name");
         $dados = [];
 
         while($row = $query->fetch(PDO::FETCH_OBJ))
