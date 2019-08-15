@@ -2,7 +2,7 @@
 
 Algoritmos desenvolvidos para coleta e processamento de tweets que foram utilizados em projetos durante o curso de Bacharelado em Sistemas de Informação na Universidade Federal de Santa Maria.
 
-O projeto foi desenvolvido em Python, utilizando uma base de dados estruturada em MySQL. A parte de visualização com alguns gráficos foi desenvolvida em PHP, utilizando HTML, CSS e JS.
+O projeto foi desenvolvido em Python (```helper```, ```src```), utilizando uma base de dados estruturada em MySQL (```tweetGather_bd.sql```). Para realização de análises iniciais, a parte visualização com alguns gráficos e tabelas foi desenvolvida em PHP, utilizando HTML, CSS e JS (```display```).
 
 No que corresponde a parte de coleta, estão disponíveis códigos para coleta de tweets via streaming e atualização dos dados de engajamento. Já no contexto de processamento, estão disponíveis códigos para: 
 
@@ -28,13 +28,13 @@ Criar conta na plataforma [Twitter Developers](https://developer.twitter.com/en.
 ```python
 def api_tokens(verify):
   keys = {}
-  if(verify == "Gather"):
-    keys['consumer_key']        = "consumer_key"
-    keys['consumer_secret']     = "consumer_secret"
-    keys['access_token']        = "access_token"
-    keys['access_token_secret'] = "access_token_secret"
 
-    return keys
+  keys['consumer_key']        = "consumer_key"
+  keys['consumer_secret']     = "consumer_secret"
+  keys['access_token']        = "access_token"
+  keys['access_token_secret'] = "access_token_secret"
+
+  return keys
 ```
 
 ---
