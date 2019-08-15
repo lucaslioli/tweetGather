@@ -1,13 +1,12 @@
 import sys
 import tweepy
 import datetime
-
 from textblob import TextBlob
 
-sys.path.append('./helper')
-from authenticate import api_tokens
-from db_connection import DbConnecion
-from log import logfile
+sys.path.append('./')
+from helper.authenticate import api_tokens
+from helper.db_connection import DbConnecion
+from helper.log import logfile
 
 # Override tweepy.StreamListener to add logic to on_status
 class MyStreamListener(tweepy.StreamListener):
@@ -127,7 +126,8 @@ def start_stream(query):
 
             continue
 
-if __name__ == '__main__': # COMPILE WITH: # python3 stream_listener.py CREDENTIALS
+# COMPILE WITH: $ python3 stream_listener.py
+if __name__ == '__main__':
     if(len(sys.argv) < 2):
         print("You need to inform the user credentials to access.")
         exit(1)

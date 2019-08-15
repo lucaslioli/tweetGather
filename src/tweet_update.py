@@ -2,11 +2,11 @@ import sys
 import tweepy
 import time
 
-sys.path.append('./helper')
-from authenticate import api_tokens
-from db_connection import DbConnecion
-from text_processing import text_cleaner
-from dictionary import *
+sys.path.append('./')
+from helper.authenticate import api_tokens
+from helper.db_connection import DbConnecion
+from helper.text_processing import text_cleaner
+from helper.dictionary import *
 
 # Para filtrar por periodo: WHERE tweet_language = 'en' AND tweet_datetime BETWEEN DATE_SUB(NOW(), INTERVAL 15 DAY) AND NOW()
 # Para atualizar todos em inglês: WHERE tweet_language = 'en'
@@ -43,7 +43,8 @@ def calc_banality(text, lang):
 
     return {'100': ban_100, '1000':ban_1000, '3000': ban_3000}
 
-if __name__ == '__main__': # COMPILE WITH: python3 tweet_update.py CREDENTIALS
+# COMPILE WITH: $ python3 tweet_update.py [-api]
+if __name__ == '__main__':
 
     if(len(sys.argv) < 2): # Auto update without uses Twitter API
         try:
