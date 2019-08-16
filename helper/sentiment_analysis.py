@@ -1,4 +1,4 @@
-from db_connection import DbConnecion
+from helper.db_connection import DbConnecion
 from textblob import TextBlob
 
 conn = DbConnecion()

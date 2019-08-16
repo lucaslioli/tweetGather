@@ -4,7 +4,7 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from db_connection import DbConnecion
+from helper.db_connection import DbConnecion
 
 def get_data(rate, user = 0, getText = 0):
     print("\n Engagement Rate:", (rate*100), "%")

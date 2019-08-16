@@ -51,17 +51,15 @@ class DbConnecion(object):
             tweet_language      = tweet["lang"]
             tweet_retweets      = tweet["retweet_count"]
             tweet_likes         = tweet["favorite_count"]
-            tweet_replies       = tweet["reply_count"]
-            tweet_replied_to    = tweet["in_reply_to_status_id"]
             tweet_polarity      = round(tweet["polarity"], 6)
             tweet_subjectivity  = round(tweet["subjectivity"], 6)
             tweet_url           = 0 if tweet_text.find('http') == -1 else 1
             tweet_hashtag       = 0 if tweet_text.find('#') == -1 else 1
             tweet_RT            = 0 if tweet_text.find('RT', 0, 2) == -1 else 1
             tweet_size          = len(tweet_text)
-            tweet_for_elections = tweet["for_elections"]
-            user_id = tweet["user_id"]
-            # user_ followers_diff = atomático por SQL
+            
+            user_id             = tweet["user_id"]
+            user_tweet_counter  = tweet["statuses_count"]
 
             with self.mysqlCon.cursor() as cur:
                 sql = "SELECT `tweet_id` FROM `tweet` WHERE `tweet_id` = %s"
@@ -72,10 +70,10 @@ class DbConnecion(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, tweet_for_elections, user_id) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, user_id, user_tweet_counter) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_replies, tweet_replied_to, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, tweet_for_elections, user_id))
+                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, user_id, user_tweet_counter))
                         
                         self.mysqlCon.commit()
                         cur.close()
@@ -121,7 +119,7 @@ class DbConnecion(object):
         return result
 
     def last_tweets_list(self):
-        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter
+        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter as counter
                 FROM tweet as t
                 JOIN user as u on u.user_id = t.user_id
                 WHERE tweet_id in (select MAX(t2.tweet_id) from tweet as t2 group by t2.user_id)

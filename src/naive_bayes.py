@@ -8,9 +8,9 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix
 
-sys.path.append('./helper')
-from db_connection import DbConnecion
-from prepare_dataset import get_data
+sys.path.append('./')
+from helper.db_connection import DbConnecion
+from helper.prepare_dataset import get_data
 
 class PopularDetector(object):
     """Implementation of Naive Bayes for binary classification"""
