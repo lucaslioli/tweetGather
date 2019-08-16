@@ -8,6 +8,7 @@ sys.path.append('./')
 from helper.authenticate import api_tokens
 from helper.db_connection import DbConnecion
 from helper.log import logfile
+from src.stream_listener import process_status
 
 # COMPILE WITH: $ python3 tweet_recovery.py
 if __name__ == '__main__':
@@ -30,26 +31,39 @@ if __name__ == '__main__':
 
     last_tweets = conn.last_tweets_list()
 
-    count = 1
-    for lt in last_tweets:
+    count = len(last_tweets)
+    for tw in last_tweets:
 
-        print(count, "User: ", lt['user_id'], "-", lt['user_name'])
+        user_info = "User: {} - {}".format(tw['user_id'], tw['user_name'])
+        print("\n\n {} {}".format(count, user_info))
 
         try:
             # The maximum count = 200
-            tweets =  api.user_timeline(user_id=lt['user_id'], since_id=lt['tweet_id'], count=2)
-            print("  List size: ", len(tweets), "\n")
-        
+            newest =  api.user_timeline(user_id=tw['user_id'], count=1)[0]
+            diff = newest.author.statuses_count - tw['counter']
+
+            while diff > 0:
+                statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=newest.id, count=200)
+                print("List size: ", len(statuses))
+
+                for st in statuses:
+                    diff -= 1
+                    try:
+                        process_status(st)
+                        message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
+                    
+                    except Exception as e:
+                        message = "{} > Tweet {} not inserted. Error: {}".format(user_info, st.id, e)
+
+                    logfile(message)
+                    print(message)
+
+                time.sleep(0.5)
+
         except Exception as e:
-            print('  Failed to upload to ftp: '+ str(e) ,'Probably deactivated account! \n')
+            message = "{} > ERROR: {}".format(user_info, e)
+            logfile(message)
+            print(message)
+        break
 
-        # TO DO
-        # Insert all searched tweets until the difference between statuses_count been zero
-
-        # for tw in tweets:
-        #     tw.text = tw.text.replace('\n', ' ').replace('\r', '')
-        #     print(tw.created_at, " | ", tw.id, " | ", tw.text[:42], "...")
-
-        count += 1
-        time.sleep(0.5)
-    
+        count -= 1
