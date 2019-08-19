@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
                 for st in statuses:
                     try:
-                        # process_status(conn, st, False)
+                        process_status(conn, st, False)
                         message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
                     
                     except Exception as e:
