@@ -35,7 +35,7 @@ if __name__ == '__main__':
     for tw in last_tweets:
 
         user_info = "User: {} - {}".format(tw['user_id'], tw['user_name'])
-        print("\n\n {} {}".format(count, user_info))
+        print("\n{} {}".format(count, user_info))
 
         try:
             # The maximum count = 200
@@ -44,16 +44,17 @@ if __name__ == '__main__':
 
             while diff > 0:
                 statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=newest.id, count=200)
-                print("List size: ", len(statuses))
+                print(user_info, "# List size: ", len(statuses))
 
                 for st in statuses:
                     diff -= 1
+
                     try:
                         process_status(st)
                         message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
                     
                     except Exception as e:
-                        message = "{} > Tweet {} not inserted. Error: {}".format(user_info, st.id, e)
+                        message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
                     logfile(message)
                     print(message)
@@ -61,9 +62,9 @@ if __name__ == '__main__':
                 time.sleep(0.5)
 
         except Exception as e:
-            message = "{} > ERROR: {}".format(user_info, e)
+            message = "{} > ERROR to get user timeline: {}".format(user_info, e)
             logfile(message)
             print(message)
-        break
 
+        print(count, user_info, "< END")
         count -= 1

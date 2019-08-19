@@ -51,6 +51,7 @@ class DbConnecion(object):
             tweet_language      = tweet["lang"]
             tweet_retweets      = tweet["retweet_count"]
             tweet_likes         = tweet["favorite_count"]
+            tweet_media         = tweet['has_media']
             tweet_polarity      = round(tweet["polarity"], 6)
             tweet_subjectivity  = round(tweet["subjectivity"], 6)
             tweet_url           = 0 if tweet_text.find('http') == -1 else 1
@@ -70,10 +71,10 @@ class DbConnecion(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, user_id, user_tweet_counter) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_RT, tweet_size, user_id, user_tweet_counter) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_RT, tweet_size, user_id, user_tweet_counter))
+                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_RT, tweet_size, user_id, user_tweet_counter))
                         
                         self.mysqlCon.commit()
                         cur.close()

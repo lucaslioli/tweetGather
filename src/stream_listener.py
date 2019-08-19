@@ -70,12 +70,13 @@ def process_status(status):
 
     # Information related about the status
     tweet_insert = {}
-    tweet_insert["id"]                    = status.id
-    tweet_insert["text"]                  = status.text
-    tweet_insert["created_at"]            = status.created_at
-    tweet_insert["lang"]                  = status.lang
-    tweet_insert["retweet_count"]         = status.retweet_count
-    tweet_insert["favorite_count"]        = status.favorite_count
+    tweet_insert["id"]              = status.id
+    tweet_insert["text"]            = status.text
+    tweet_insert["created_at"]      = status.created_at
+    tweet_insert["lang"]            = status.lang
+    tweet_insert["retweet_count"]   = status.retweet_count
+    tweet_insert["favorite_count"]  = status.favorite_count
+    tweet_insert["has_media"]       = 1 if 'media' in status.entities else 0
 
     tweet_insert["user_id"]         = status.author.id
     tweet_insert["followers_count"] = status.author.followers_count
@@ -89,7 +90,7 @@ def process_status(status):
         try:
             text = TextBlob(str(text.translate(from_lang = status.lang, to='en')))
         except:
-            message = "WARING: " + str(status.id) + "The text can not be translated."
+            message = "WARING: " + str(status.id) + " The text can not be translated to English."
 
             logfile(message)
 
