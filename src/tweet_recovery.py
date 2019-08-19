@@ -2,6 +2,7 @@ import sys
 import time
 import tweepy
 import datetime
+import progressbar
 from textblob import TextBlob
 
 sys.path.append('./')
@@ -34,37 +35,40 @@ if __name__ == '__main__':
     count = len(last_tweets)
     for tw in last_tweets:
 
-        user_info = "User: {} - {}".format(tw['user_id'], tw['user_name'])
-        print("\n{} {}".format(count, user_info))
+        user_info = "{} User: {} - {}".format(count, tw['user_id'], tw['user_name'])
+                
+        logfile(user_info)
+        print(user_info)
 
         try:
-            # The maximum count = 200
             newest =  api.user_timeline(user_id=tw['user_id'], count=1)[0]
-            diff = newest.author.statuses_count - tw['counter']
+            total = diff = newest.author.statuses_count - tw['counter']
+
+            bar = progressbar.ProgressBar(max_value=total)
 
             while diff > 0:
+                # The maximum count = 200
                 statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=newest.id, count=200)
-                print(user_info, "# List size: ", len(statuses))
+                
+                logfile("{} # List size: {}".format(user_info, len(statuses)))
 
                 for st in statuses:
-                    diff -= 1
-
                     try:
-                        process_status(st)
+                        # process_status(conn, st, False)
                         message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
                     
                     except Exception as e:
                         message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
-                    logfile(message)
-                    print(message)
+                    bar.update(total-diff)
+                    newest = st 
+                    diff -= 1
 
-                time.sleep(0.5)
+                    logfile(message)
+                    time.sleep(0.1)
 
         except Exception as e:
-            message = "{} > ERROR to get user timeline: {}".format(user_info, e)
-            logfile(message)
-            print(message)
+            logfile("{} > ERROR to get user timeline: {}".format(user_info, e))
 
-        print(count, user_info, "< END")
+        logfile(count, user_info, "< END")
         count -= 1

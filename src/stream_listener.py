@@ -20,7 +20,8 @@ class MyStreamListener(tweepy.StreamListener):
         # elif(status.author.id not in api.friends_ids()):
         #     return False
         else:
-            process_status(status)
+            conn = DbConnecion()
+            process_status(conn, status)
 
         print("-----------------------------------------")
         print("Date:", status.created_at)
@@ -54,19 +55,18 @@ class MyStreamListener(tweepy.StreamListener):
 
         return True # Don't kill the stream
 
-def process_status(status):
-    conn = DbConnecion()
+def process_status(conn, status, insert_user = True):
+    if(insert_user):
+        # Information related about the status' author
+        user_insert = {}
+        user_insert['id']            = status.author.id
+        user_insert["name"]          = status.author.name
+        user_insert["screen_name"]   = status.author.screen_name
+        user_insert['friends_count'] = status.author.friends_count
+        user_insert["lang"]          = status.author.lang
 
-    # Information related about the status' author
-    user_insert = {}
-    user_insert['id']            = status.author.id
-    user_insert["name"]          = status.author.name
-    user_insert["screen_name"]   = status.author.screen_name
-    user_insert['friends_count'] = status.author.friends_count
-    user_insert["lang"]          = status.author.lang
-
-    # For now, all the users have already been inserted
-    conn.insert_user(user_insert)
+        # For now, all the users have already been inserted
+        conn.insert_user(user_insert)
 
     # Information related about the status
     tweet_insert = {}
@@ -84,15 +84,6 @@ def process_status(status):
 
     # Get the sentiment polarity of the message
     text = TextBlob(status.text)
-
-    # Try to translate the message
-    if status.lang != 'en':
-        try:
-            text = TextBlob(str(text.translate(from_lang = status.lang, to='en')))
-        except:
-            message = "WARING: " + str(status.id) + " The text can not be translated to English."
-
-            logfile(message)
 
     tweet_insert["polarity"]     = text.sentiment.polarity
     tweet_insert["subjectivity"] = text.sentiment.subjectivity
