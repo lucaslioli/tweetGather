@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS `tweet` (
   `tweet_url` int(11) unsigned DEFAULT NULL,
   `tweet_hashtag` int(11) unsigned DEFAULT NULL,
   `tweet_media` int(11) unsigned DEFAULT NULL,
+  `tweet_streamed` INT(11) UNSIGNED NULL DEFAULT NULL,
   `tweet_RT` int(11) unsigned DEFAULT NULL,
   `tweet_size` int(11) unsigned DEFAULT NULL,
   `tweet_ban_100` decimal(7,6) DEFAULT NULL,

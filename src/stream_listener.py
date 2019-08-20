@@ -55,7 +55,7 @@ class MyStreamListener(tweepy.StreamListener):
 
         return True # Don't kill the stream
 
-def process_status(conn, status, insert_user = True):
+def process_status(conn, status, streamed = True, insert_user = True):
     if(insert_user):
         # Information related about the status' author
         user_insert = {}
@@ -77,6 +77,7 @@ def process_status(conn, status, insert_user = True):
     tweet_insert["retweet_count"]   = status.retweet_count
     tweet_insert["favorite_count"]  = status.favorite_count
     tweet_insert["has_media"]       = 1 if 'media' in status.entities else 0
+    tweet_insert["streamed"]        = 1 if streamed else 0
 
     tweet_insert["user_id"]         = status.author.id
     tweet_insert["followers_count"] = status.author.followers_count

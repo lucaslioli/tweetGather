@@ -52,6 +52,7 @@ class DbConnecion(object):
             tweet_retweets      = tweet["retweet_count"]
             tweet_likes         = tweet["favorite_count"]
             tweet_media         = tweet['has_media']
+            tweet_streamed      = tweet['streamed']
             tweet_polarity      = round(tweet["polarity"], 6)
             tweet_subjectivity  = round(tweet["subjectivity"], 6)
             tweet_url           = 0 if tweet_text.find('http') == -1 else 1
@@ -71,10 +72,10 @@ class DbConnecion(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_RT, tweet_size, user_id, user_tweet_counter) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
 
-                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_RT, tweet_size, user_id, user_tweet_counter))
+                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter))
                         
                         self.mysqlCon.commit()
                         cur.close()
@@ -120,10 +121,13 @@ class DbConnecion(object):
         return result
 
     def last_tweets_list(self):
-        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter as counter
+        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter as tweet_counter,
+                    (SELECT MAX(t3.user_tweet_counter) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_max,
+                    (SELECT COUNT(*) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_diff,
+                    (SELECT MIN(t3.tweet_id) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS max_id
                 FROM tweet as t
                 JOIN user as u on u.user_id = t.user_id
-                WHERE tweet_id in (select MAX(t2.tweet_id) from tweet as t2 group by t2.user_id)
+                WHERE tweet_id in (select MAX(t2.tweet_id) from tweet as t2 where t2.tweet_streamed = 1 group by t2.user_id)
                 GROUP BY user_id"""
 
         cur = self.mysqlCon.cursor()
