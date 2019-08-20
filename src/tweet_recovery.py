@@ -13,6 +13,7 @@ from src.stream_listener import process_status
 
 # The API can only return up to 3,200 of a user's most recent Tweets
 TWEETS_LIMIT = 3200
+CONTROL_FLAG_LIMIT = 5
 
 # COMPILE WITH: $ python3 tweet_recovery.py
 # Before start this process, all tweets must have the column tweet_streamed filled with 1
@@ -44,6 +45,8 @@ if __name__ == '__main__':
         logfile(user_info)
         print(user_info)
 
+        control_flag = 0
+
         try:
             if(tw['max_id'] is None):
                 newest = api.user_timeline(user_id=tw['user_id'], count=1)[0]
@@ -64,10 +67,18 @@ if __name__ == '__main__':
                 # The maximum count = 200
                 statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
                 
-                logfile("{} # List size: {}".format(user_info, len(statuses)))
+                if(control_flag == CONTROL_FLAG_LIMIT):
+                    logfile("{} # Control flag limit reached ({})!".format(user_info, control_flag))
+                    diff = 0
+                    continue
+
+                logfile("{} # Tweets left: {} # List size: {}".format(user_info, diff, len(statuses)))
+
+                if(len(statuses) <= 1):
+                    control_flag += 1
                 
                 for st in statuses:
-                    if(max_id == st.id):
+                    if(max_id == st.id and max_id != statuses[0].id):
                         continue
 
                     try:
@@ -77,9 +88,9 @@ if __name__ == '__main__':
                     except Exception as e:
                         message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
-                    bar.update(max_diff-diff)
-                    max_id = st.id
                     diff -= 1
+                    max_id = st.id
+                    bar.update(max_diff-diff-1)
 
                     logfile(message)
 
@@ -90,9 +101,11 @@ if __name__ == '__main__':
             time.sleep(1) # For each user searched
 
         except Exception as e:
-            message = "{} > ERROR to get user timeline: {}".format(user_info, e)
+            message = "{} > ERROR while handling user timeline: {}".format(user_info, e)
             logfile(message)
             print(message, "\n")
+            count -= 1
+            continue
 
         message = "{} # It's Done! Maximum possible tweets retrived!".format(user_info)
         logfile(message)
