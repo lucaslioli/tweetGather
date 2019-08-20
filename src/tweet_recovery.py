@@ -11,21 +11,25 @@ from helper.db_connection import DbConnecion
 from helper.log import logfile
 from src.stream_listener import process_status
 
+# The API can only return up to 3,200 of a user's most recent Tweets
+TWEETS_LIMIT = 3200
+
 # COMPILE WITH: $ python3 tweet_recovery.py
+# Before start this process, all tweets must have the column tweet_streamed filled with 1
 if __name__ == '__main__':
     keys = api_tokens()
 
-    # Obtenção das chaves de atenticação da API
+    # Obtaining API access keys and tokens
     access_token        = keys['access_token']
     access_token_secret = keys['access_token_secret']
     consumer_key        = keys['consumer_key']
     consumer_secret     = keys['consumer_secret']
 
-    # Autenticação com a API Tweepy
+    # Tweepy API authentication
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
 
-    # Autenticação com a API
+    # API authentication
     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
     conn = DbConnecion()
@@ -41,34 +45,59 @@ if __name__ == '__main__':
         print(user_info)
 
         try:
-            newest =  api.user_timeline(user_id=tw['user_id'], count=1)[0]
-            total = diff = newest.author.statuses_count - tw['counter']
+            if(tw['max_id'] is None):
+                newest = api.user_timeline(user_id=tw['user_id'], count=1)[0]
+                max_id = newest.id
+                diff = newest.author.statuses_count - tw['tweet_counter']
+                max_diff = TWEETS_LIMIT
+            else:
+                max_id = tw['max_id']
+                diff = max(0, (tw['counter_max'] - tw['tweet_counter'] - tw['counter_diff']))
+                max_diff = max(0, (TWEETS_LIMIT - tw['counter_diff']))
+            
+            diff = max_diff = min(diff, max_diff)
 
-            bar = progressbar.ProgressBar(max_value=total)
+            if(max_diff):
+                bar = progressbar.ProgressBar(max_value=max_diff)
 
             while diff > 0:
                 # The maximum count = 200
-                statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=newest.id, count=200)
+                statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
                 
                 logfile("{} # List size: {}".format(user_info, len(statuses)))
-
+                
                 for st in statuses:
+                    if(max_id == st.id):
+                        continue
+
                     try:
-                        process_status(conn, st, False)
+                        process_status(conn, st, False, False)
                         message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
                     
                     except Exception as e:
                         message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
-                    bar.update(total-diff)
-                    newest = st 
+                    bar.update(max_diff-diff)
+                    max_id = st.id
                     diff -= 1
 
                     logfile(message)
-                    time.sleep(0.1)
+
+                    time.sleep(0.1) # For each insertion
+
+                time.sleep(5) # For each API request
+
+            time.sleep(1) # For each user searched
 
         except Exception as e:
-            logfile("{} > ERROR to get user timeline: {}".format(user_info, e))
+            message = "{} > ERROR to get user timeline: {}".format(user_info, e)
+            logfile(message)
+            print(message, "\n")
 
-        logfile(count, user_info, "< END")
+        message = "{} # It's Done! Maximum possible tweets retrived!".format(user_info)
+        logfile(message)
+        print(message, "\n")
+
         count -= 1
+
+    exit()
