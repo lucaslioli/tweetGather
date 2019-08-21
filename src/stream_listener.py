@@ -62,7 +62,7 @@ class MyStreamListener(tweepy.StreamListener):
         print("-----------------------------------------")
 
         time.sleep(15 * 60)
-        return True# Don't kill the stream
+        return True # Don't kill the stream
 
 def process_status(conn, status, streamed = True, insert_user = True):
     if(insert_user):
@@ -108,9 +108,9 @@ def start_stream(query = None):
     print_and_log(message, LOGNAME)
 
     if(query is None):
-        query = ','.join(str(i) for i in api.friends_ids())
+        query = list(map(str, api.friends_ids()))
 
-    print ("Query being trackaed = ", query)
+    print ("Query being trackaed =", query)
 
     while True:
         try:
