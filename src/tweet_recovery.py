@@ -8,16 +8,13 @@ from textblob import TextBlob
 sys.path.append('./')
 from helper.authenticate import api_tokens
 from helper.db_connection import DbConnecion
-from helper.log import logfile
+from helper.log import logfile, print_and_log
 from src.stream_listener import process_status
 
 # The API can only return up to 3,200 of a user's most recent Tweets
 TWEETS_LIMIT = 3200
 CONTROL_FLAG_LIMIT = 5
-
-def print_and_log(message, newline = "\n"):
-    logfile(message)
-    print(message, newline)
+LOGNAME = "-recovery"
 
 # COMPILE WITH: $ python3 tweet_recovery.py
 # Before start this process, all tweets must have the column tweet_streamed filled with 1
@@ -46,7 +43,7 @@ if __name__ == '__main__':
 
         user_info = "{} User: {} - {}".format(count, tw['user_id'], tw['user_name'])
 
-        print_and_log(user_info, "")
+        print_and_log(user_info, LOGNAME, "")
 
         control_flag = 0
 
@@ -71,11 +68,11 @@ if __name__ == '__main__':
                 statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
                 
                 if(control_flag == CONTROL_FLAG_LIMIT):
-                    print_and_log("{} # Control flag limit reached ({})!".format(user_info, control_flag))
+                    print_and_log("{} # Control flag limit reached ({})!".format(user_info, control_flag), LOGNAME)
                     diff = 0
                     continue
 
-                logfile("{} # Tweets left: {} # List size: {}".format(user_info, diff, len(statuses)))
+                logfile("{} # Tweets left: {} # List size: {}".format(user_info, diff, len(statuses)), LOGNAME)
 
                 if(len(statuses) <= 1):
                     control_flag += 1
@@ -92,7 +89,7 @@ if __name__ == '__main__':
                     max_id = st.id-1
                     bar.update(max_diff-diff-1)
 
-                    logfile(message)
+                    logfile(message, LOGNAME)
 
                     time.sleep(0.1) # For each insertion
 
@@ -101,12 +98,12 @@ if __name__ == '__main__':
             time.sleep(1) # For each user searched
 
         except Exception as e:
-            print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e))
+            print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e), LOGNAME)
             count -= 1
             continue
 
         if(control_flag == CONTROL_FLAG_LIMIT):
-            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info))
+            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME)
 
         count -= 1
 

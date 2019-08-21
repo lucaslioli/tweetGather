@@ -106,8 +106,9 @@ authenticate.py
 tweet_exemple.txt
 # Scripts manuais de insersão
 insert_followers.sql
+
 # Logfile
-logfile.txt
+logfile*.txt
 
 t.txt
 \.vscode/

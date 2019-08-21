@@ -8,17 +8,15 @@ from helper.authenticate import api_tokens
 from helper.db_connection import DbConnecion
 from helper.log import logfile
 
+LOGNAME = "-stream"
+
 # Override tweepy.StreamListener to add logic to on_status
 class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
 
-        if(status.lang != 'en'):
+        if(status.author.id not in api.friends_ids()):
             return False
-        elif(status.author.followers_count < 10000):
-            return False
-        # elif(status.author.id not in api.friends_ids()):
-        #     return False
         else:
             conn = DbConnecion()
             process_status(conn, status)
@@ -30,7 +28,7 @@ class MyStreamListener(tweepy.StreamListener):
         # print("Followers:", status.author.followers_count)
 
         message = "INSERT tweet " + str(status.id) + " for user " + status.author.name
-        logfile(message)
+        logfile(message, LOGNAME)
 
         return False # Don't kill the stream
 
@@ -39,7 +37,7 @@ class MyStreamListener(tweepy.StreamListener):
 
         print(sys.stderr, message)
         print("-----------------------------------------")
-        logfile(message)
+        logfile(message, LOGNAME)
 
         if status_code == 420:
             return False
@@ -51,7 +49,7 @@ class MyStreamListener(tweepy.StreamListener):
 
         print(message)
         print("-----------------------------------------")
-        logfile(message)
+        logfile(message, LOGNAME)
 
         return True # Don't kill the stream
 
@@ -97,7 +95,7 @@ def start_stream(query):
     message = "---------- STARTING STREAMING -----------"
 
     print (message)
-    logfile(message)
+    logfile(message, LOGNAME)
 
     while True:
         try:
@@ -109,23 +107,18 @@ def start_stream(query):
 
             print(message)
             print("-----------------------------------------")
-            logfile(message)
+            logfile(message, LOGNAME)
 
             continue
 
 # COMPILE WITH: $ python3 stream_listener.py
 if __name__ == '__main__':
-    if(len(sys.argv) < 2):
-        print("You need to inform the user credentials to access.")
-        exit(1)
-
-    else:
-        keys = api_tokens(sys.argv[1])
-        # Obtenção das chaves de atenticação da API
-        access_token        = keys['access_token']
-        access_token_secret = keys['access_token_secret']
-        consumer_key        = keys['consumer_key']
-        consumer_secret     = keys['consumer_secret']
+    keys = api_tokens()
+    # Obtenção das chaves de atenticação da API
+    access_token        = keys['access_token']
+    access_token_secret = keys['access_token_secret']
+    consumer_key        = keys['consumer_key']
+    consumer_secret     = keys['consumer_secret']
 
     # Autenticação com a API Tweepy
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
