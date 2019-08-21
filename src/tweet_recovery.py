@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
         user_info = "{} User: {} - {}".format(count, tw['user_id'], tw['user_name'])
 
-        print_and_log(user_info, LOGNAME, "")
+        print_and_log(user_info, LOGNAME)
 
         control_flag = 0
 
@@ -68,7 +68,7 @@ if __name__ == '__main__':
                 statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
                 
                 if(control_flag == CONTROL_FLAG_LIMIT):
-                    print_and_log("{} # Control flag limit reached ({})!".format(user_info, control_flag), LOGNAME)
+                    print_and_log("{} # Control flag limit reached ({})!".format(user_info, control_flag), LOGNAME, "\n")
                     diff = 0
                     continue
 
@@ -98,12 +98,12 @@ if __name__ == '__main__':
             time.sleep(1) # For each user searched
 
         except Exception as e:
-            print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e), LOGNAME)
+            print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e), LOGNAME, "\n")
             count -= 1
             continue
 
         if(control_flag == CONTROL_FLAG_LIMIT):
-            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME)
+            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
 
         count -= 1
 
