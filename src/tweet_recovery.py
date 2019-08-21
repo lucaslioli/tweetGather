@@ -15,6 +15,10 @@ from src.stream_listener import process_status
 TWEETS_LIMIT = 3200
 CONTROL_FLAG_LIMIT = 5
 
+def print_and_log(message, newline = "\n"):
+    logfile(message)
+    print(message, newline)
+
 # COMPILE WITH: $ python3 tweet_recovery.py
 # Before start this process, all tweets must have the column tweet_streamed filled with 1
 if __name__ == '__main__':
@@ -41,9 +45,8 @@ if __name__ == '__main__':
     for tw in last_tweets:
 
         user_info = "{} User: {} - {}".format(count, tw['user_id'], tw['user_name'])
-                
-        logfile(user_info)
-        print(user_info)
+
+        print_and_log(user_info, "")
 
         control_flag = 0
 
@@ -54,7 +57,7 @@ if __name__ == '__main__':
                 diff = newest.author.statuses_count - tw['tweet_counter']
                 max_diff = TWEETS_LIMIT
             else:
-                max_id = tw['max_id']
+                max_id = tw['max_id']-1
                 diff = max(0, (tw['counter_max'] - tw['tweet_counter'] - tw['counter_diff']))
                 max_diff = max(0, (TWEETS_LIMIT - tw['counter_diff']))
             
@@ -68,7 +71,7 @@ if __name__ == '__main__':
                 statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
                 
                 if(control_flag == CONTROL_FLAG_LIMIT):
-                    logfile("{} # Control flag limit reached ({})!".format(user_info, control_flag))
+                    print_and_log("{} # Control flag limit reached ({})!".format(user_info, control_flag))
                     diff = 0
                     continue
 
@@ -78,9 +81,6 @@ if __name__ == '__main__':
                     control_flag += 1
                 
                 for st in statuses:
-                    if(max_id == st.id and max_id != statuses[0].id):
-                        continue
-
                     try:
                         process_status(conn, st, False, False)
                         message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
@@ -89,7 +89,7 @@ if __name__ == '__main__':
                         message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
                     diff -= 1
-                    max_id = st.id
+                    max_id = st.id-1
                     bar.update(max_diff-diff-1)
 
                     logfile(message)
@@ -101,15 +101,12 @@ if __name__ == '__main__':
             time.sleep(1) # For each user searched
 
         except Exception as e:
-            message = "{} > ERROR while handling user timeline: {}".format(user_info, e)
-            logfile(message)
-            print(message, "\n")
+            print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e))
             count -= 1
             continue
 
-        message = "{} # It's Done! Maximum possible tweets retrived!".format(user_info)
-        logfile(message)
-        print(message, "\n")
+        if(control_flag == CONTROL_FLAG_LIMIT):
+            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info))
 
         count -= 1
 
