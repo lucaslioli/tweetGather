@@ -10,37 +10,43 @@ from helper.db_connection import DbConnecion
 from helper.log import logfile, print_and_log
 
 LOGNAME = "-stream"
+DELIMITER = "-" * 99
+HALF_DELIMITER = ("-"*40)
 
 # Override tweepy.StreamListener to add logic to on_status
 class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
-
-        print("-----------------------------------------")
-
-        if(status.author.id not in api.friends_ids()):
-            message = "Tweet skipped: {} Author: {}".format(status.id, status.author.screen_name)
-            print_and_log(message, LOGNAME)
-            return False
-        else:
+        # Extra variable myfriends_ids created in main
+        if(status.author.id not in api.myfriends_ids):
+            # Tweet skipped because it isn't from a friend account
+            return True # Don't kill the stream
+        
+        try:
             conn = DbConnecion()
             process_status(conn, status)
 
-        print("Date:", status.created_at)
-        print("User:", status.author.screen_name)
-        print("Text:", api.get_status(status.id, tweet_mode='extended').full_text)
-        # print("Followers:", status.author.followers_count)
+            print("Date:", status.created_at)
+            print("User:", status.author.screen_name)
+            print("Text:", status.text[:99], "[...]")
 
-        message = "INSERT tweet " + str(status.id) + " for user " + status.author.name
-        logfile(message, LOGNAME)
+            message = "INSERTED tweet {}, from author {}".format(status.id, status.author.name)
+            print_and_log(message, LOGNAME)
 
-        return False # Don't kill the stream
+        except Exception as e:
+            message = "ERROR: While inserting tweet {} = {}".format(status.id, e)
+
+            print_and_log(message, LOGNAME)
+        
+        print(DELIMITER)
+
+        return True # Don't kill the stream
 
     def on_error(self, status_code):
         message = 'Encountered error with status code: ' + str(status_code)
 
         print_and_log(message, LOGNAME)
-        print("-----------------------------------------")
+        print(DELIMITER)
 
         if status_code == 420:
             return False
@@ -51,7 +57,7 @@ class MyStreamListener(tweepy.StreamListener):
         message = sys.stderr + 'Timeout...'
 
         print_and_log(message, LOGNAME)
-        print("-----------------------------------------")
+        print(DELIMITER)
 
         return True # Don't kill the stream
     
@@ -59,10 +65,12 @@ class MyStreamListener(tweepy.StreamListener):
         message = 'Rate Limit Exceeded, Sleep for 15 Mins'
 
         print_and_log(message, LOGNAME)
-        print("-----------------------------------------")
+        print(DELIMITER)
 
         time.sleep(15 * 60)
         return True # Don't kill the stream
+    
+    # END
 
 def process_status(conn, status, streamed = True, insert_user = True):
     if(insert_user):
@@ -101,17 +109,11 @@ def process_status(conn, status, streamed = True, insert_user = True):
     # Insert the message into database
     conn.insert_tweet(tweet_insert)
 
+    # END
+
 # Start the Stream Listener
 def start_stream(query = None):
-    message = "---------- STARTING STREAMING -----------"
-
-    print_and_log(message, LOGNAME)
-
-    if(query is None):
-        query = list(map(str, api.friends_ids()))
-
-    print ("Query being trackaed =", query)
-
+    
     while True:
         try:
             myStream = tweepy.streaming.Stream(api.auth, MyStreamListener())
@@ -121,11 +123,16 @@ def start_stream(query = None):
             message = "ERROR: Exeption occurred! {}".format(e)
 
             print_and_log(message, LOGNAME)
-            print("-----------------------------------------")
+            print(DELIMITER)
 
             continue
 
         time.sleep(10)
+
+        message = "{0} (RE)STARTING STREAMING {0}".format(HALF_DELIMITER)
+        print_and_log(message, LOGNAME)
+    
+    # END
 
 # COMPILE WITH: $ python3 stream_listener.py
 if __name__ == '__main__':
@@ -136,16 +143,27 @@ if __name__ == '__main__':
     consumer_key        = keys['consumer_key']
     consumer_secret     = keys['consumer_secret']
 
-    # Autenticação com a API Tweepy
+    # Autenticação com a API
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
 
-    # Autenticação com a API
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
-    # query = [] # Query to filter by the user's screen name
-    # for friend in api.friends(count=99):
-    #     query.append("@"+friend.screen_name)
-    #     query.append(friend.screen_name)
+    # Variable created to avoid multiple requests for friends ids
+    api.myfriends_ids = api.friends_ids()
+    api.myfriends_ids.append(api.me().id)
 
-    start_stream()
+    # Users to stream
+    query = list(map(str, api.myfriends_ids))
+
+    # Added own account id to make tests
+    query.append(str(api.me().id))
+
+    print ("\nQuery being tracked =", query)
+
+    message = "{0} STARTING STREAMING {0}".format(HALF_DELIMITER)
+    print_and_log(message, LOGNAME)
+
+    start_stream(query)
+
+    # END
