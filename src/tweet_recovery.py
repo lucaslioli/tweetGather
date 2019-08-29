@@ -136,15 +136,10 @@ def user_timeline_recovery(conn, api):
             
             # Controller to don't be trapped into only one user for so long
             if(control_flag and control_flag % CONTROL_FLAG_LIMIT == 0):
-                message = "{} # Control flag limit ({}) reached! Sleep for 15 mins".format(user_info, control_flag)
+                message = "{} # Control flag limit ({}) reached!".format(user_info, control_flag)
                 logfile(message, LOGNAME)
-                control_flag += 1
-
-                if(control_flag / CONTROL_FLAG_LIMIT == CONTROL_FLAG_LIMIT):
-                    diff = 0
-                else:
-                    time.sleep(15 * 60)
                 
+                diff = 0
                 continue
 
             logfile("{} # Tweets left: {} # List size: {}".format(user_info, diff, len(statuses)), LOGNAME)
