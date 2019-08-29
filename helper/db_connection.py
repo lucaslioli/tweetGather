@@ -4,6 +4,8 @@ import pymysql.cursors
 
 class DbConnecion(object):
 
+    # # # # # # # # # # # # # # # # # # # # # CONNECTION # # # # # # # # # # # # # # # # # # # # # #
+
     mysqlCon = pymysql.connect(
         host        = '127.0.0.1',
         user        = 'root',
@@ -12,6 +14,8 @@ class DbConnecion(object):
         charset     = 'utf8mb4',
         cursorclass = pymysql.cursors.DictCursor
     )
+
+    # # # # # # # # # # # # # # # # # # # # WRITE OPERATIONS # # # # # # # # # # # # # # # # # # # #
 
     def insert_user(self, user):
         if 'id' in user:
@@ -72,8 +76,9 @@ class DbConnecion(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity,
+                            tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE tweet_id=tweet_id"""
 
                         cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter))
                         
@@ -94,12 +99,9 @@ class DbConnecion(object):
 
             with self.mysqlCon.cursor() as cur:
                 sql = """INSERT INTO user_followers_history (user_id, user_followers, date_time, difference) 
-                        VALUES (%s, %s, NOW(),
-                            (SELECT %s-u1.user_followers 
-                            FROM user_followers_history u1 
-                            WHERE u1.user_id = %s 
-                            ORDER BY u1.date_time DESC 
-                            LIMIT 1))"""
+                        VALUES (%s, %s, NOW(), (SELECT %s-u1.user_followers
+                            FROM user_followers_history u1 WHERE u1.user_id = %s 
+                            ORDER BY u1.date_time DESC LIMIT 1))"""
 
                 cur.execute(sql, (user_id, user_followers, user_followers, user_id))
                 self.mysqlCon.commit()
@@ -107,37 +109,6 @@ class DbConnecion(object):
 
         else:
             return False
-
-    def tweet_list(self, where = ''):
-        sql = """SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, tweet_retweets as retweets, tweet_likes as likes, deleted 
-                FROM tweet """ + where
-
-        cur = self.mysqlCon.cursor()
-
-        cur.execute(sql)
-        result = cur.fetchall()
-        cur.close()
-
-        return result
-
-    def last_tweets_list(self):
-        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter as tweet_counter,
-                    (SELECT MAX(t3.user_tweet_counter) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_max,
-                    (SELECT COUNT(*) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_diff,
-                    (SELECT MIN(t3.tweet_id) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS max_id
-                FROM tweet as t
-                JOIN user as u on u.user_id = t.user_id
-                WHERE tweet_id in (select MAX(t2.tweet_id) from tweet as t2 where t2.tweet_streamed = 1 group by t2.user_id)
-                GROUP BY user_id"""
-
-        cur = self.mysqlCon.cursor()
-
-        cur.execute(sql)
-        result = cur.fetchall()
-        cur.close()
-
-        return result
-
 
     def update_sentiment(self, tweet_id, polarity, subjectivity):
         sql = "UPDATE tweet SET tweet_polarity = %s, tweet_subjectivity = %s WHERE tweet_id = %s"
@@ -159,15 +130,8 @@ class DbConnecion(object):
 
     def update_tweet(self, tweet_id, deleted=0, retweets=-1, likes=-1, text='', text_after='', ban_100=-1, ban_1000=-1, ban_3000=-1):
 
-        sql = """UPDATE tweet SET 
-                    deleted = %s, 
-                    tweet_retweets = %s, 
-                    tweet_likes = %s, 
-                    tweet_text = %s, 
-                    tweet_text_after = %s, 
-                    tweet_ban_100 = %s, 
-                    tweet_ban_1000 = %s, 
-                    tweet_ban_3000 = %s 
+        sql = """UPDATE tweet SET deleted = %s, tweet_retweets = %s, tweet_likes = %s, tweet_text = %s, tweet_text_after = %s, 
+                    tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s 
                 WHERE tweet_id = %s"""
 
         cur = self.mysqlCon.cursor()
@@ -204,32 +168,13 @@ class DbConnecion(object):
             cur.execute("UPDATE tweet SET tweet_RT = 1 WHERE tweet_text LIKE 'RT @%'")
 
             print("Updating the size range of each message...")
+
             cur.execute("UPDATE tweet SET tweet_size = 0 WHERE LENGTH(tweet_text) = 0")
-            cur.execute("UPDATE tweet SET tweet_size = 10 WHERE LENGTH(tweet_text) <= 10 AND LENGTH(tweet_text) > 0")
-            cur.execute("UPDATE tweet SET tweet_size = 20 WHERE LENGTH(tweet_text) <= 20 AND LENGTH(tweet_text) > 10")
-            cur.execute("UPDATE tweet SET tweet_size = 30 WHERE LENGTH(tweet_text) <= 30 AND LENGTH(tweet_text) > 20")
-            cur.execute("UPDATE tweet SET tweet_size = 40 WHERE LENGTH(tweet_text) <= 40 AND LENGTH(tweet_text) > 30")
-            cur.execute("UPDATE tweet SET tweet_size = 50 WHERE LENGTH(tweet_text) <= 50 AND LENGTH(tweet_text) > 40")
-            cur.execute("UPDATE tweet SET tweet_size = 60 WHERE LENGTH(tweet_text) <= 60 AND LENGTH(tweet_text) > 50")
-            cur.execute("UPDATE tweet SET tweet_size = 70 WHERE LENGTH(tweet_text) <= 70 AND LENGTH(tweet_text) > 60")
-            cur.execute("UPDATE tweet SET tweet_size = 80 WHERE LENGTH(tweet_text) <= 80 AND LENGTH(tweet_text) > 70")
-            cur.execute("UPDATE tweet SET tweet_size = 90 WHERE LENGTH(tweet_text) <= 90 AND LENGTH(tweet_text) > 80")
-            cur.execute("UPDATE tweet SET tweet_size = 100 WHERE LENGTH(tweet_text) <= 100 AND LENGTH(tweet_text) > 90")
-            cur.execute("UPDATE tweet SET tweet_size = 110 WHERE LENGTH(tweet_text) <= 110 AND LENGTH(tweet_text) > 100")
-            cur.execute("UPDATE tweet SET tweet_size = 120 WHERE LENGTH(tweet_text) <= 120 AND LENGTH(tweet_text) > 110")
-            cur.execute("UPDATE tweet SET tweet_size = 130 WHERE LENGTH(tweet_text) <= 130 AND LENGTH(tweet_text) > 120")
-            cur.execute("UPDATE tweet SET tweet_size = 140 WHERE LENGTH(tweet_text) <= 140 AND LENGTH(tweet_text) > 130")
-            cur.execute("UPDATE tweet SET tweet_size = 150 WHERE LENGTH(tweet_text) <= 150 AND LENGTH(tweet_text) > 140")
-            cur.execute("UPDATE tweet SET tweet_size = 160 WHERE LENGTH(tweet_text) <= 160 AND LENGTH(tweet_text) > 150")
-            cur.execute("UPDATE tweet SET tweet_size = 170 WHERE LENGTH(tweet_text) <= 170 AND LENGTH(tweet_text) > 160")
-            cur.execute("UPDATE tweet SET tweet_size = 180 WHERE LENGTH(tweet_text) <= 180 AND LENGTH(tweet_text) > 170")
-            cur.execute("UPDATE tweet SET tweet_size = 190 WHERE LENGTH(tweet_text) <= 190 AND LENGTH(tweet_text) > 180")
-            cur.execute("UPDATE tweet SET tweet_size = 200 WHERE LENGTH(tweet_text) <= 200 AND LENGTH(tweet_text) > 190")
-            cur.execute("UPDATE tweet SET tweet_size = 210 WHERE LENGTH(tweet_text) <= 210 AND LENGTH(tweet_text) > 200")
-            cur.execute("UPDATE tweet SET tweet_size = 210 WHERE LENGTH(tweet_text) <= 210 AND LENGTH(tweet_text) > 210")
-            cur.execute("UPDATE tweet SET tweet_size = 230 WHERE LENGTH(tweet_text) <= 230 AND LENGTH(tweet_text) > 220")
-            cur.execute("UPDATE tweet SET tweet_size = 240 WHERE LENGTH(tweet_text) <= 240 AND LENGTH(tweet_text) > 230")
-            cur.execute("UPDATE tweet SET tweet_size = 250 WHERE LENGTH(tweet_text) <= 250 AND LENGTH(tweet_text) > 240")
+            
+            for i in range(1, 26):
+                j = i*10
+                cur.execute("UPDATE tweet SET tweet_size = {0} WHERE LENGTH(tweet_text) <= {0} AND LENGTH(tweet_text) > {1}".format(j, j-10))
+
             cur.execute("UPDATE tweet SET tweet_size = 255 WHERE LENGTH(tweet_text) <= 255 AND LENGTH(tweet_text) > 250")
 
             self.mysqlCon.commit()
@@ -238,6 +183,49 @@ class DbConnecion(object):
             print('EXEPTION occurred! ' + str(sys.exc_info()[1]))
 
         cur.close()
+
+    # # # # # # # # # # # # # # # # # # # # READ OPERATIONS # # # # # # # # # # # # # # # # # # # #
+
+    def tweet_list(self, where = ''):
+        sql = """SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, tweet_retweets as retweets, tweet_likes as likes, deleted 
+                FROM tweet """ + where
+
+        cur = self.mysqlCon.cursor()
+
+        cur.execute(sql)
+        result = cur.fetchall()
+        cur.close()
+
+        return result
+
+    def last_tweets_list(self):
+        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter as tweet_counter,
+                    (SELECT MAX(t3.user_tweet_counter) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_max,
+                    (SELECT COUNT(*) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_diff,
+                    (SELECT MIN(t3.tweet_id) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS max_id
+                FROM tweet as t
+                JOIN user as u on u.user_id = t.user_id
+                WHERE tweet_id in (select MAX(t2.tweet_id) from tweet as t2 where t2.tweet_streamed = 1 group by t2.user_id)
+                GROUP BY user_id"""
+
+        cur = self.mysqlCon.cursor()
+
+        cur.execute(sql)
+        result = cur.fetchall()
+        cur.close()
+
+        return result
+
+    def users_list(self):
+        sql = """SELECT * FROM user"""
+
+        cur = self.mysqlCon.cursor()
+
+        cur.execute(sql)
+        result = cur.fetchall()
+        cur.close()
+
+        return result
 
     def tweets_attr(self, rate, user=0, counter=0):
         sql = """SELECT
