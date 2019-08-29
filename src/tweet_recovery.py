@@ -137,7 +137,7 @@ def user_timeline_recovery(conn, api):
             # Controller to don't be trapped into only one user for so long
             if(control_flag and control_flag % CONTROL_FLAG_LIMIT == 0):
                 message = "{} # Control flag limit ({}) reached! Sleep for 15 mins".format(user_info, control_flag)
-                logfile(message, LOGNAME, "\n")
+                logfile(message, LOGNAME)
                 control_flag += 1
 
                 if(control_flag / CONTROL_FLAG_LIMIT == CONTROL_FLAG_LIMIT):
