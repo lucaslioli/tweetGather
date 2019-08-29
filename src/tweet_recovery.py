@@ -168,8 +168,9 @@ def user_timeline_recovery(conn, api):
 
         time.sleep(1) # For each user searched
 
-        if(control_flag == CONTROL_FLAG_LIMIT):
-            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
+        if(control_flag == CONTROL_FLAG_LIMIT or diff == 0):
+            bar.update(max_diff)
+            print_and_log(" {} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
 
         count -= 1
 
