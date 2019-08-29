@@ -9,7 +9,7 @@ sys.path.append('./')
 from helper.authenticate import api_tokens
 from helper.db_connection import DbConnecion
 from helper.log import logfile, print_and_log
-from src.stream_listener import process_status
+from src.stream_listener import process_status, insert_new_user
 
 # The API can only return up to 3,200 of a user's most recent Tweets
 TWEETS_LIMIT = 3200
@@ -90,6 +90,7 @@ def period_recovery(conn, api):
 
 def user_timeline_recovery(conn, api):
     all_users = api.friends_ids()
+    inserted_users = conn.users_list()
 
     count = len(all_users)
 
@@ -107,11 +108,24 @@ def user_timeline_recovery(conn, api):
             print_and_log(user_info, LOGNAME)
 
         except Exception as e:
-            user_info = "{} User: {} - {}".format(count, user_id)
+            user_info = "{} User: {}".format(count, user_id)
             print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e), LOGNAME, "\n")
             count -= 1
             continue
 
+        # In case that the user has not been inserted
+        if(user_id not in inserted_users.keys()):
+            try:
+                insert_new_user(conn, newest.author)
+                message = "{} > Inserted new user!".format(user_info)
+            
+            except Exception as e:
+                message = "{} > ERROR to insert user!".format(user_info)
+                continue
+            
+            logfile(message, LOGNAME)
+
+        # Start the progress bar if necessary
         if(max_diff):
             bar = progressbar.ProgressBar(max_value=max_diff)
 
@@ -133,12 +147,12 @@ def user_timeline_recovery(conn, api):
                 
                 continue
 
-
             logfile("{} # Tweets left: {} # List size: {}".format(user_info, diff, len(statuses)), LOGNAME)
 
             if(len(statuses) <= 1):
                 control_flag += 1
             
+            # Process all tweets from the current block collected
             for st in statuses:
                 try:
                     process_status(conn, st, False, False)
@@ -164,7 +178,6 @@ def user_timeline_recovery(conn, api):
 
         count -= 1
 
-
 # COMPILE WITH: $ python3 tweet_recovery.py [--user]
 # Before start this process for the first time, all tweets must have the column tweet_streamed filled with 1
 if __name__ == '__main__':
@@ -185,10 +198,12 @@ if __name__ == '__main__':
 
     conn = DbConnecion()
 
-    if(len(sys.argv) < 2): # Recovery user period of tweets (since and max id)
+    # Recovery user period of tweets (since and max id)
+    if(len(sys.argv) < 2):
         period_recovery(conn, api)
 
-    else: # Recovery all user timeline as possible
+    # Recovery all user timeline as possible
+    else:
         user_timeline_recovery(conn, api)
 
     exit()

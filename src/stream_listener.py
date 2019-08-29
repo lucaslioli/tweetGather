@@ -74,16 +74,8 @@ class MyStreamListener(tweepy.StreamListener):
 
 def process_status(conn, status, streamed = True, insert_user = True):
     if(insert_user):
-        # Information related about the status' author
-        user_insert = {}
-        user_insert['id']            = status.author.id
-        user_insert["name"]          = status.author.name
-        user_insert["screen_name"]   = status.author.screen_name
-        user_insert['friends_count'] = status.author.friends_count
-        user_insert["lang"]          = status.author.lang
-
-        # For now, all the users have already been inserted
-        conn.insert_user(user_insert)
+        if(status.author.id not in conn.users_list().keys()):
+            insert_new_user(conn, status.author)
 
     # Information related about the status
     tweet_insert = {}
@@ -110,6 +102,18 @@ def process_status(conn, status, streamed = True, insert_user = True):
     conn.insert_tweet(tweet_insert)
 
     # END
+
+def insert_new_user(conn, author):
+    # Information related about the status' author
+    user_insert = {}
+    user_insert['id']            = author.id
+    user_insert["name"]          = author.name
+    user_insert["screen_name"]   = author.screen_name
+    user_insert['friends_count'] = author.friends_count
+    user_insert["lang"]          = author.lang
+
+    # For now, all the users have already been inserted
+    conn.insert_user(user_insert)
 
 # Start the Stream Listener
 def start_stream(query = None):

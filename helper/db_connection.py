@@ -26,21 +26,12 @@ class DbConnecion(object):
             user_language    = user["lang"]
 
             with self.mysqlCon.cursor() as cur:
-                sql = "SELECT `user_id` FROM `user` WHERE `user_id` = %s"
+                sql = """INSERT INTO user (user_id, user_name, user_screen_name, user_following, user_language) 
+                    VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE user_id=user_id"""
 
-                cur.execute(sql, (user_id))
-
-                result = cur.fetchone()
-
+                cur.execute(sql, (user_id, user_name, user_screen_name, user_following, user_language))
+                self.mysqlCon.commit()
                 cur.close()
-
-                if(result is None):
-                    with self.mysqlCon.cursor() as cur:
-                        sql = "INSERT INTO user (user_id, user_name, user_screen_name, user_following, user_language) VALUES (%s, %s, %s, %s, %s)"
-
-                        cur.execute(sql, (user_id, user_name, user_screen_name, user_following, user_language))
-                        self.mysqlCon.commit()
-                        cur.close()
 
             return True
 
@@ -222,8 +213,13 @@ class DbConnecion(object):
         cur = self.mysqlCon.cursor()
 
         cur.execute(sql)
-        result = cur.fetchall()
+        allUsers = cur.fetchall()
         cur.close()
+
+        result = {}
+
+        for user in allUsers:
+            result[user['user_id']] = user['user_name']
 
         return result
 
