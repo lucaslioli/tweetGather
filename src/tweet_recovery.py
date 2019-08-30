@@ -98,6 +98,7 @@ def user_timeline_recovery(conn, api):
         # Initial information to start the collection
         try:
             control_flag = 0
+            progress = 0
 
             newest = api.user_timeline(user_id=user_id, count=1)[0]
             max_id = newest.id
@@ -118,6 +119,7 @@ def user_timeline_recovery(conn, api):
             try:
                 insert_new_user(conn, newest.author)
                 message = "{} > Inserted new user!".format(user_info)
+                inserted_users[user_id] = user_id
             
             except Exception as e:
                 message = "{} > ERROR to insert user!".format(user_info)
@@ -144,6 +146,8 @@ def user_timeline_recovery(conn, api):
 
             logfile("{} # Tweets left: {} # List size: {}".format(user_info, diff, len(statuses)), LOGNAME)
 
+            diff = max(diff, len(statuses))
+
             if(len(statuses) <= 1):
                 control_flag += 1
             
@@ -157,8 +161,11 @@ def user_timeline_recovery(conn, api):
                     message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
                 diff -= 1
+                progress += 1
                 max_id = st.id-1
-                bar.update(max_diff-diff-1)
+
+                if(progress <= max_diff):
+                    bar.update(progress)
 
                 logfile(message, LOGNAME)
 
@@ -169,7 +176,6 @@ def user_timeline_recovery(conn, api):
         time.sleep(1) # For each user searched
 
         if(control_flag == CONTROL_FLAG_LIMIT or diff == 0):
-            bar.update(max_diff)
             print_and_log(" {} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
 
         count -= 1
