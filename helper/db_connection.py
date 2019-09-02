@@ -81,58 +81,43 @@ class DbConnecion(object):
         else:
             return False
 
-    def insert_user_followers_history(self, user):
-        if 'id' in user:
-            user_id          = user["id"]
-            user_followers   = user["followers_count"]
-            # user_ followers_diff = atomático por SQL
-            # date_time = automático por SQL
-
-            with self.mysqlCon.cursor() as cur:
-                sql = """INSERT INTO user_followers_history (user_id, user_followers, date_time, difference) 
-                        VALUES (%s, %s, NOW(), (SELECT %s-u1.user_followers
-                            FROM user_followers_history u1 WHERE u1.user_id = %s 
-                            ORDER BY u1.date_time DESC LIMIT 1))"""
-
-                cur.execute(sql, (user_id, user_followers, user_followers, user_id))
-                self.mysqlCon.commit()
-                cur.close()
-
-        else:
-            return False
-
-    def update_sentiment(self, tweet_id, polarity, subjectivity):
-        sql = "UPDATE tweet SET tweet_polarity = %s, tweet_subjectivity = %s WHERE tweet_id = %s"
-
-        cur = self.mysqlCon.cursor()
-
-        try:
-            cur.execute(sql, (polarity, subjectivity, tweet_id))
-            self.mysqlCon.commit()
-            result = "Ok"
-
-        except:
-            result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
-            print(result)
-
-        cur.close()
-
-        return result
-
-    def update_tweet(self, tweet_id, deleted=0, retweets=-1, likes=-1, text='', text_after='', ban_100=-1, ban_1000=-1, ban_3000=-1):
-
-        sql = """UPDATE tweet SET deleted = %s, tweet_retweets = %s, tweet_likes = %s, tweet_text = %s, tweet_text_after = %s, 
+    def update_tweet(self, tweet_id, deleted=0, media=0, retweets=-1, likes=-1, text='', text_after='', ban_100=-1, ban_1000=-1, ban_3000=-1):
+    
+        sql = """UPDATE tweet SET deleted = %s, tweet_media = %s,
+                    tweet_retweets = %s, tweet_likes = %s, 
+                    tweet_text = %s, tweet_text_after = %s, 
                     tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s 
                 WHERE tweet_id = %s"""
 
         cur = self.mysqlCon.cursor()
 
         try:
-            cur.execute(sql, (deleted, retweets, likes, text, text_after, ban_100, ban_1000, ban_3000, tweet_id))
+            cur.execute(sql, (deleted, media, retweets, likes, text, text_after, ban_100, ban_1000, ban_3000, tweet_id))
             self.mysqlCon.commit()
             result = "Ok"
 
         except:
+            result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
+            self.mysqlCon.rollback()
+            print("opa4")
+
+        cur.close()
+
+        return result
+
+    def update_tweet_text_after(self, tweet_id, text_after=''):
+    
+        sql = "UPDATE tweet SET tweet_text_after = %s WHERE tweet_id = %s"
+
+        cur = self.mysqlCon.cursor()
+
+        try:
+            cur.execute(sql, (text_after, tweet_id))
+            self.mysqlCon.commit()
+            result = "Ok"
+
+        except:
+            self.mysqlCon.rollback()
             result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
 
         cur.close()
@@ -143,12 +128,12 @@ class DbConnecion(object):
         cur = self.mysqlCon.cursor()
 
         try:
-            print("Updating tweet text to remove the borring emoji...")
+            print("Updating tweet text to remove the borring emoji '⃣'...")
             cur.execute("UPDATE tweet SET tweet_text_after = REPLACE(tweet_text_after, '⃣', '') WHERE tweet_text_after like '%⃣%'")
 
             print("Updating usage of URLs...")
-            cur.execute("UPDATE tweet AS t SET t.tweet_url = 0 WHERE t.tweet_text NOT LIKE '%http%'")
-            cur.execute("UPDATE tweet AS t SET t.tweet_url = 1 WHERE t.tweet_text LIKE '%http%'")
+            cur.execute("UPDATE tweet AS t SET tweet_url = 0 WHERE tweet_text NOT LIKE '%http%'")
+            cur.execute("UPDATE tweet AS t SET tweet_url = 1 WHERE tweet_text LIKE '%http%'")
 
             print("Updating usage of Hashtags...")
             cur.execute("UPDATE tweet SET tweet_hashtag = 0 WHERE tweet_text NOT LIKE '%#%'")
@@ -159,18 +144,16 @@ class DbConnecion(object):
             cur.execute("UPDATE tweet SET tweet_RT = 1 WHERE tweet_text LIKE 'RT @%'")
 
             print("Updating the size range of each message...")
-
             cur.execute("UPDATE tweet SET tweet_size = 0 WHERE LENGTH(tweet_text) = 0")
-            
             for i in range(1, 26):
                 j = i*10
                 cur.execute("UPDATE tweet SET tweet_size = {0} WHERE LENGTH(tweet_text) <= {0} AND LENGTH(tweet_text) > {1}".format(j, j-10))
-
             cur.execute("UPDATE tweet SET tweet_size = 255 WHERE LENGTH(tweet_text) <= 255 AND LENGTH(tweet_text) > 250")
 
             self.mysqlCon.commit()
 
         except:
+            self.mysqlCon.rollback()
             print('EXEPTION occurred! ' + str(sys.exc_info()[1]))
 
         cur.close()
@@ -178,7 +161,8 @@ class DbConnecion(object):
     # # # # # # # # # # # # # # # # # # # # READ OPERATIONS # # # # # # # # # # # # # # # # # # # #
 
     def tweet_list(self, where = ''):
-        sql = """SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, tweet_retweets as retweets, tweet_likes as likes, deleted 
+        sql = """SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, 
+                    tweet_retweets as retweets, tweet_likes as likes, deleted 
                 FROM tweet """ + where
 
         cur = self.mysqlCon.cursor()

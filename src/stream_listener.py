@@ -124,7 +124,7 @@ def start_stream(query = None):
             myStream.filter(follow=query)
 
         except Exception as e:
-            message = "ERROR: Exeption occurred! {}".format(e)
+            message = "ERROR: Exception occurred! {}".format(e)
 
             print_and_log(message, LOGNAME)
             print(DELIMITER)

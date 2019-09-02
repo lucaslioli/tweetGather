@@ -185,7 +185,7 @@ def user_timeline_recovery(conn, api):
 
         count -= 1
 
-# COMPILE WITH: $ python3 tweet_recovery.py [--user]
+# COMPILE WITH: $ python3 tweet_recovery.py [-user]
 # Before start this process for the first time, all tweets must have the column tweet_streamed filled with 1
 if __name__ == '__main__':
     keys = api_tokens()
