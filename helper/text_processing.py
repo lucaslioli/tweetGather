@@ -25,9 +25,6 @@ def text_cleaner(text):
     # Getting the set of stop words
     stop = set(stopwords.words('portuguese'))
 
-    # Getting the set of punctuation
-    pont=set(string.punctuation)
-
     # Instance an object lemmatizer
     lemma = WordNetLemmatizer()
 
@@ -56,8 +53,9 @@ def text_cleaner(text):
     # To remove the stop words from the text
     text = ' '.join([w for w in text.split() if w not in stop])
 
-    # To remove the ponctuation from the text
-    text = ''.join(c for c in text if c not in pont)
+    # Map punctuation from the text to space
+    translation_table = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+    text = text.translate(translation_table)
 
     # Lemmatizes the text
     #text = ' '.join(lemma.lemmatize(w) for w in text.split())
@@ -67,7 +65,7 @@ def text_cleaner(text):
           if unicodedata.category(c) != 'Mn')
 
     # To remove number from the text
-    text = ''.join([c for c in text if not c.isdigit()])
+    text = ''.join(c for c in text if not c.isdigit())
 
     # To remove words with only one character
     text = ' '.join( [w for w in text.split() if len(w)>1])
