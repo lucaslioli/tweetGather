@@ -22,7 +22,7 @@ def period_recovery(conn, api):
     count = len(last_tweets)
     for tw in last_tweets:
 
-        user_info = " {0:<3} User: {1} - {2}".format(count, tw['user_id'], tw['user_name'])
+        user_info = "{0:<3} User: {1} - {2}".format(count, tw['user_id'], tw['user_name'])
 
         print_and_log(user_info, LOGNAME)
 
@@ -89,7 +89,7 @@ def period_recovery(conn, api):
         time.sleep(1) # For each user searched
 
         if(control_flag == CONTROL_FLAG_LIMIT or diff == 0):
-            print_and_log("{} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
+            print_and_log(" {} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
 
         count -= 1
 
