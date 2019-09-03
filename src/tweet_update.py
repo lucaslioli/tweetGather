@@ -115,7 +115,9 @@ if __name__ == '__main__':
 
         except:            
             text_after = text_cleaner(tw['txt'])
-            cur = conn.update_tweet(tw['id'], 1, tw['retweets'], tw['likes'], tw['txt'], text_after, ban['100'], ban['1000'], ban['3000'])
+            ban = calc_banality(text_after, tw['lang'])
+
+            cur = conn.update_tweet(tw['id'], 1, 0, tw['retweets'], tw['likes'], tw['txt'], text_after, ban['100'], ban['1000'], ban['3000'])
 
             print("\n {} \n Result: {} \n ERRO: {} ".format(i, cur, sys.exc_info()[1]))
             print("\n Id: {} ".format(tw['id']))
