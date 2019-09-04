@@ -130,7 +130,7 @@ if __name__ == '__main__':
         print("\n", DELIMITER)
 
         i -= 1
-        time.sleep(0.8)
+        time.sleep(0.5)
     exit()
     
     # Updates using only SQL
