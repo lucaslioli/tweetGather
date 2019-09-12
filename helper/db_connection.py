@@ -99,7 +99,6 @@ class DbConnecion(object):
         except:
             result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
             self.mysqlCon.rollback()
-            print("opa4")
 
         cur.close()
 
@@ -157,6 +156,26 @@ class DbConnecion(object):
             print('EXEPTION occurred! ' + str(sys.exc_info()[1]))
 
         cur.close()
+
+    def update_user(self, user_id, info):
+        sql = """UPDATE user SET user_following = %s, user_followers = %s, 
+                    user_created_at = %s, user_location = %s, user_description = %s
+                WHERE user_id = %s"""
+
+        cur = self.mysqlCon.cursor()
+
+        try:
+            cur.execute(sql, (info['following'], info['followers'], info['created_at'], info['location'], info['description'], user_id))
+            self.mysqlCon.commit()
+            result = "Ok"
+
+        except:
+            result = 'EXEPTION occurred!' + str(sys.exc_info()[1])
+            self.mysqlCon.rollback()
+
+        cur.close()
+
+        return result
 
     # # # # # # # # # # # # # # # # # # # # READ OPERATIONS # # # # # # # # # # # # # # # # # # # #
 
