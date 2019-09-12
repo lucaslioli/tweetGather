@@ -5,8 +5,8 @@ USE `tweetgather`;
 -- Dumping structure for table tweetgather.tweet
 CREATE TABLE IF NOT EXISTS `tweet` (
   `tweet_id` bigint(20) unsigned NOT NULL,
-  `tweet_text` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
-  `tweet_text_after` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
+  `tweet_text` text CHARACTER SET utf8mb4,
+  `tweet_text_after` text CHARACTER SET utf8mb4,
   `tweet_datetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tweet_language` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `tweet_retweets` int(11) DEFAULT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `tweet` (
   `tweet_url` int(11) unsigned DEFAULT NULL,
   `tweet_hashtag` int(11) unsigned DEFAULT NULL,
   `tweet_media` int(11) unsigned DEFAULT NULL,
-  `tweet_streamed` INT(11) UNSIGNED NULL DEFAULT NULL,
+  `tweet_streamed` int(11) unsigned DEFAULT NULL,
   `tweet_RT` int(11) unsigned DEFAULT NULL,
   `tweet_size` int(11) unsigned DEFAULT NULL,
   `tweet_ban_100` decimal(7,6) DEFAULT NULL,
@@ -38,7 +38,11 @@ CREATE TABLE IF NOT EXISTS `user` (
   `user_name` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
   `user_screen_name` varchar(255) COLLATE utf8_bin NOT NULL,
   `user_following` int(11) unsigned DEFAULT NULL,
+  `user_followers` int(11) unsigned DEFAULT NULL,
   `user_language` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `user_created_at` datetime DEFAULT NULL,
+  `user_location` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `user_description` varchar(255) CHARACTER SET utf8mb4 DEFAULT NULL,
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
