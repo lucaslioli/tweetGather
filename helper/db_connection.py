@@ -5,15 +5,15 @@ import pymysql.cursors
 class DbConnecion(object):
 
     # # # # # # # # # # # # # # # # # # # # # CONNECTION # # # # # # # # # # # # # # # # # # # # # #
-
-    mysqlCon = pymysql.connect(
-        host        = '127.0.0.1',
-        user        = 'root',
-        password    = '321',
-        db          = 'tweetgather',
-        charset     = 'utf8mb4',
-        cursorclass = pymysql.cursors.DictCursor
-    )
+    def __init__(self):
+        self.mysqlCon = pymysql.connect(
+            host        = '127.0.0.1',
+            user        = 'root',
+            password    = '321',
+            db          = 'tweetgather',
+            charset     = 'utf8mb4',
+            cursorclass = pymysql.cursors.DictCursor
+        )
 
     # # # # # # # # # # # # # # # # # # # # WRITE OPERATIONS # # # # # # # # # # # # # # # # # # # #
 
