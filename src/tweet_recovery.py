@@ -7,7 +7,7 @@ from textblob import TextBlob
 
 sys.path.append('./')
 from helper.authenticate import api_tokens
-from helper.db_connection import DbConnecion
+from helper.db_connection import DbConnection
 from helper.log import logfile, print_and_log
 from src.stream_listener import process_status, insert_new_user
 
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     # API authentication
     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
-    conn = DbConnecion()
+    conn = DbConnection()
 
     # Recovery user period of tweets (since and max id)
     if(len(sys.argv) < 2):

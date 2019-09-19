@@ -3,7 +3,7 @@ import tweepy
 
 sys.path.append('./')
 from helper.authenticate import api_tokens
-from helper.db_connection import DbConnecion
+from helper.db_connection import DbConnection
 
 DELIMITER = "-" * 99
 
@@ -23,7 +23,7 @@ if __name__ == '__main__':
     # API authentication
     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
-    conn = DbConnecion()
+    conn = DbConnection()
 
     users = conn.users_list()
     i = len(users)

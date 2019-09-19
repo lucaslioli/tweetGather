@@ -6,7 +6,7 @@ from textblob import TextBlob
 
 sys.path.append('./')
 from helper.authenticate import api_tokens
-from helper.db_connection import DbConnecion
+from helper.db_connection import DbConnection
 from helper.log import logfile, print_and_log
 
 LOGNAME = "-stream"
@@ -23,7 +23,7 @@ class MyStreamListener(tweepy.StreamListener):
             return True # Don't kill the stream
         
         try:
-            conn = DbConnecion()
+            conn = DbConnection()
             process_status(conn, status)
 
             print("Date:", status.created_at)

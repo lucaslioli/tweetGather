@@ -2,18 +2,22 @@ import sys
 import pymysql
 import pymysql.cursors
 
-class DbConnecion(object):
+class DbConnection(object):
 
     # # # # # # # # # # # # # # # # # # # # # CONNECTION # # # # # # # # # # # # # # # # # # # # # #
     def __init__(self):
-        self.mysqlCon = pymysql.connect(
-            host        = '127.0.0.1',
-            user        = 'root',
-            password    = '321',
-            db          = 'tweetgather',
-            charset     = 'utf8mb4',
-            cursorclass = pymysql.cursors.DictCursor
-        )
+        try:
+            self.mysqlCon = pymysql.connect(
+                host        = '127.0.0.1',
+                user        = 'root',
+                password    = '3210',
+                db          = 'tweetgather',
+                charset     = 'utf8mb4',
+                cursorclass = pymysql.cursors.DictCursor
+            )
+        except Exception as e:
+            print("Não foi possível estabeler uma conexão com o banco!\nERROR:", str(e))
+            exit()
 
     # # # # # # # # # # # # # # # # # # # # WRITE OPERATIONS # # # # # # # # # # # # # # # # # # # #
 

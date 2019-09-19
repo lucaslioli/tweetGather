@@ -4,7 +4,7 @@ import time
 
 sys.path.append('./')
 from helper.authenticate import api_tokens
-from helper.db_connection import DbConnecion
+from helper.db_connection import DbConnection
 from helper.text_processing import text_cleaner
 from helper.dictionary import *
 
@@ -47,10 +47,10 @@ def calc_banality(text, lang):
 # COMPILE WITH: $ python3 tweet_update.py [-api]
 if __name__ == '__main__':
 
+    conn = DbConnection()
+
     if(len(sys.argv) < 2): # Auto update without uses Twitter API
         try:
-            conn = DbConnecion()
-
             tweets = conn.tweet_list(QUERY)
 
             print("Cleaning and updating all the messages...")
@@ -84,7 +84,6 @@ if __name__ == '__main__':
     api = tweepy.API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
     print("UPDATING TWEETS \nSEARCHING: {} \n {}".format(QUERY, DELIMITER))
-    conn = DbConnecion()
 
     # Return a list with all tweets in the base
     tweets = conn.tweet_list(QUERY)

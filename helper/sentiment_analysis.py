@@ -1,7 +1,7 @@
-from helper.db_connection import DbConnecion
+from helper.db_connection import DbConnection
 from textblob import TextBlob
 
-conn = DbConnecion()
+conn = DbConnection()
 
 tweets = conn.tweet_list("WHERE tweet_polarity IS NULL")
 

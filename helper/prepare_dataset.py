@@ -4,13 +4,13 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
-from helper.db_connection import DbConnecion
+from helper.db_connection import DbConnection
 
 def get_data(rate, user = 0, getText = 0):
     print("\n Engagement Rate:", (rate*100), "%")
     print(" User:", user)
 
-    conn = DbConnecion()
+    conn = DbConnection()
 
     # Get all the tweets with the attributes
     tweets = conn.tweets_attr(rate, user)
