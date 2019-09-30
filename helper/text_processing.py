@@ -1,13 +1,15 @@
 import re
-import emoji                                    # Remove all emojis from the texts
-import string                                   # Remove the ponctuation from the texts
-import unicodedata                              # Remove the accents from the texts
-from nltk.corpus import stopwords               # Methods to remove stop words
-from nltk.stem.wordnet import WordNetLemmatizer # Methods to lemmatize the textsZ
+import emoji                                     # Remove emojis from text
+import string                                    # Remove ponctuation from text
+import unicodedata                               # Remove accents from text
+from nltk.corpus import stopwords                # Methods to remove stop words
+from nltk.stem.wordnet import WordNetLemmatizer  # Methods to lemmatize text
+
 
 def text_cleaner(text):
 
-    emoji_pattern = re.compile("["
+    emoji_pattern = re.compile(
+        "["
         u"\U0001F600-\U0001F64F"  # emoticons
         u"\U0001F300-\U0001F5FF"  # symbols & pictographs
         u"\U0001F680-\U0001F6FF"  # transport & map symbols
@@ -15,7 +17,7 @@ def text_cleaner(text):
         u"\U00002702-\U000027B0"
         u"\U000024C2-\U0001F251"
         u"\U0001f926-\U0001f937"
-        u"\u2640-\u2642" 
+        u"\u2640-\u2642"
         u"\xf0\x9f\x98\x86"
         u"\xe2\x80\xa6"
         u"\u2026"
@@ -44,7 +46,8 @@ def text_cleaner(text):
     text = re.sub(r'\b(a*ha+h[ha]*|o?l+o+l+[ol]*)\b', '', text)
 
     # To remove words (laughs) that have a sigle letter (e.g. kkkkk)
-    text = ' '.join(w for w in text.split() if len(''.join(c for c in w if c != w[0]))>1)
+    text = ' '.join(w for w in text.split()
+                    if len(''.join(c for c in w if c != w[0])) > 1)
 
     # To remove the emojis from the text
     text = emoji.get_emoji_regexp().sub(r'', text)
@@ -54,21 +57,23 @@ def text_cleaner(text):
     text = ' '.join([w for w in text.split() if w not in stop])
 
     # Map punctuation from the text to space
-    translation_table = str.maketrans(string.punctuation, ' '*len(string.punctuation))
+    translation_table = str.maketrans(string.punctuation,
+                                      ' ' * len(string.punctuation))
+
     text = text.translate(translation_table)
 
     # Lemmatizes the text
-    #text = ' '.join(lemma.lemmatize(w) for w in text.split())
+    # text = ' '.join(lemma.lemmatize(w) for w in text.split())
 
     # To remove the accents from the text
     text = ''.join(c for c in unicodedata.normalize('NFD', text)
-          if unicodedata.category(c) != 'Mn')
+                   if unicodedata.category(c) != 'Mn')
 
     # To remove number from the text
     text = ''.join(c for c in text if not c.isdigit())
 
     # To remove words with only one character
-    text = ' '.join( [w for w in text.split() if len(w)>1])
+    text = ' '.join([w for w in text.split() if len(w) > 1])
 
     # To remove duplicate letters - STAND BY
     # text = re.sub(r'(\w)\1+', r'\1', text)

@@ -48,13 +48,13 @@ if __name__ == '__main__':
             print(" Location:", user.location)
             print(" Description:", user.description[:99])
             print("\n {}".format(DELIMITER))
-        
+
         except Exception as e:
             print("\n Nº:", i)
             print(" User: {} - {}".format(users[user_id], user_id))
             print(" > ERROR while tried to get user information:", e)
             print("\n {}".format(DELIMITER))
 
-        i -= 1        
+        i -= 1
 
     exit()

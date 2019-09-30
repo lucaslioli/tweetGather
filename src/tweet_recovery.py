@@ -9,12 +9,13 @@ sys.path.append('./')
 from helper.authenticate import api_tokens
 from helper.db_connection import DbConnection
 from helper.log import logfile, print_and_log
-from src.stream_listener import process_status, insert_new_user
+from stream_listener import process_status, insert_new_user
 
 # The API can only return up to 3,200 of a user's most recent Tweets
 TWEETS_LIMIT = 3200
 CONTROL_FLAG_LIMIT = 5
 LOGNAME = "-recovery"
+
 
 def period_recovery(conn, api):
     last_tweets = conn.last_tweets_list()
@@ -22,7 +23,8 @@ def period_recovery(conn, api):
     count = len(last_tweets)
     for tw in last_tweets:
 
-        user_info = "{0:<3} User: {1} - {2}".format(count, tw['user_id'], tw['user_name'])
+        user_info = "{0:<3} User: {1} - {2}".format(
+            count, tw['user_id'], tw['user_name'])
 
         print_and_log(user_info, LOGNAME)
 
@@ -40,9 +42,9 @@ def period_recovery(conn, api):
                 max_id = tw['max_id']-1
                 diff = max(0, (tw['counter_max'] - tw['tweet_counter'] - tw['counter_diff']))
                 max_diff = max(0, (TWEETS_LIMIT - tw['counter_diff']))
-            
+
             diff = max_diff = min(diff, max_diff)
-        
+
         except Exception as e:
             print_and_log("{} > ERROR while handling user timeline: {}".format(user_info, e), LOGNAME, "\n")
             count -= 1
@@ -53,8 +55,8 @@ def period_recovery(conn, api):
 
         while diff > 0:
             # The maximum count = 200
-            statuses =  api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
-            
+            statuses = api.user_timeline(user_id=tw['user_id'], since_id=tw['tweet_id'], max_id=max_id, count=200)
+
             if(control_flag == CONTROL_FLAG_LIMIT):
                 print_and_log("{} # Control flag limit reached ({})!".format(user_info, control_flag), LOGNAME, "\n")
                 diff = 0
@@ -64,12 +66,12 @@ def period_recovery(conn, api):
 
             if(len(statuses) <= 1):
                 control_flag += 1
-            
+
             for st in statuses:
                 try:
                     process_status(conn, st, False, False)
                     message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
-                
+
                 except Exception as e:
                     message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
@@ -82,16 +84,17 @@ def period_recovery(conn, api):
 
                 logfile(message, LOGNAME)
 
-                time.sleep(0.1) # For each insertion
+                time.sleep(0.1)  # For each insertion
 
-            time.sleep(5) # For each API request
+            time.sleep(5)  # For each API request
 
-        time.sleep(1) # For each user searched
+        time.sleep(1)  # For each user searched
 
         if(control_flag == CONTROL_FLAG_LIMIT or diff == 0):
             print_and_log(" {} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
 
         count -= 1
+
 
 def user_timeline_recovery(conn, api):
     all_users = api.friends_ids()
@@ -125,11 +128,11 @@ def user_timeline_recovery(conn, api):
                 insert_new_user(conn, newest.author)
                 message = "{} > Inserted new user!".format(user_info)
                 inserted_users[user_id] = user_id
-            
+
             except Exception as e:
                 message = "{} > ERROR to insert user!".format(user_info)
                 continue
-            
+
             logfile(message, LOGNAME)
 
         # Start the progress bar if necessary
@@ -139,13 +142,13 @@ def user_timeline_recovery(conn, api):
         # Collet tweets until the difference be zero
         while diff > 0:
             # The maximum count allwed by Twitter is 200
-            statuses =  api.user_timeline(user_id=user_id, max_id=max_id, count=200)
-            
+            statuses = api.user_timeline(user_id=user_id, max_id=max_id, count=200)
+
             # Controller to don't be trapped into only one user for so long
             if(control_flag == CONTROL_FLAG_LIMIT):
                 message = "{} # Control flag limit ({}) reached!".format(user_info, control_flag)
                 logfile(message, LOGNAME)
-                
+
                 diff = 0
                 continue
 
@@ -155,13 +158,13 @@ def user_timeline_recovery(conn, api):
 
             if(len(statuses) <= 1):
                 control_flag += 1
-            
+
             # Process all tweets from the current block collected
             for st in statuses:
                 try:
                     process_status(conn, st, False, False)
                     message = "{} > Inserted tweet {} - {} - {}".format(user_info, st.id, st.created_at, diff)
-                
+
                 except Exception as e:
                     message = "{} > ERROR to insert Tweet {}: {}".format(user_info, st.id, e)
 
@@ -174,11 +177,11 @@ def user_timeline_recovery(conn, api):
 
                 logfile(message, LOGNAME)
 
-                time.sleep(0.1) # For each insertion
+                time.sleep(0.1)  # For each insertion
 
-            time.sleep(5) # For each API request
+            time.sleep(5)  # For each API request
 
-        time.sleep(1) # For each user searched
+        time.sleep(1)  # For each user searched
 
         if(control_flag == CONTROL_FLAG_LIMIT or diff == 0):
             print_and_log(" {} # It's Done! Maximum possible tweets retrived!".format(user_info), LOGNAME, "\n")
@@ -188,6 +191,7 @@ def user_timeline_recovery(conn, api):
 # COMPILE WITH: $ python3 tweet_recovery.py [-user]
 # Before start this process for the first time, all tweets must have the column tweet_streamed filled with 1
 if __name__ == '__main__':
+
     keys = api_tokens()
 
     # Obtaining API access keys and tokens

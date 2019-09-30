@@ -12,6 +12,7 @@ sys.path.append('./')
 from helper.db_connection import DbConnection
 from helper.prepare_dataset import get_data
 
+
 class PopularDetector(object):
     """Implementation of Naive Bayes for binary classification"""
     def clean(self, s):
@@ -65,11 +66,17 @@ class PopularDetector(object):
             spam_score = 0
             ham_score = 0
             for word, _ in counts.items():
-                if word not in self.vocab: continue
+                if word not in self.vocab:
+                    continue
 
                 # add Laplace smoothing
-                log_w_given_spam = math.log( (self.word_counts['spam'].get(word, 0.0) + 1) / (self.num_messages['spam'] + len(self.vocab)) )
-                log_w_given_ham = math.log( (self.word_counts['ham'].get(word, 0.0) + 1) / (self.num_messages['ham'] + len(self.vocab)) )
+                log_w_given_spam = math.log((
+                    self.word_counts['spam'].get(word, 0.0) + 1) /
+                    (self.num_messages['spam'] + len(self.vocab)))
+
+                log_w_given_ham = math.log((
+                    self.word_counts['ham'].get(word, 0.0) + 1) /
+                    (self.num_messages['ham'] + len(self.vocab)))
 
                 spam_score += log_w_given_spam
                 ham_score += log_w_given_ham
@@ -83,35 +90,44 @@ class PopularDetector(object):
                 result.append(0)
         return result
 
-if __name__ == '__main__': # COMPILE WITH: python3 naive_bayes.py RATE USER
+# COMPILE WITH: python3 naive_bayes.py RATE USER
+if __name__ == '__main__':
 
-    arg_names = ['command','rate', 'user']
+    arg_names = ['command', 'rate', 'user']
     args = dict(zip(arg_names, sys.argv))
 
+    # Minimum value of engagement rate to consider an tweet as popular
     if('rate' not in args):
-        args['rate'] = 0.02 # Minimum value of engagement rate to consider an tweet as popular
+        args['rate'] = 0.02
     else:
         args['rate'] = float(args['rate'])
 
+    # The ID of specific user author
     if('user' not in args):
-        args['user'] = 0 # The ID of specific user author
+        args['user'] = 0
 
     attr, label, popular = get_data(args['rate'], args['user'], 1)
 
     # Divide the tweets into train and test lists
-    attr_train, attr_test, label_train, label_test = train_test_split(attr, label, test_size=0.40, random_state=42)
+    attr_train, attr_test, label_train, label_test = \
+        train_test_split(attr, label, test_size=0.40, random_state=42)
 
     # print(*attr_test, sep='\n')
-    print(" Attr Train:", len(attr_train), "\tLabel Train:", len(label_train), "\t60% \n",
-        "Attr Test:", len(attr_test), "\tLabel Test:", len(label_test), "\t40% \n")
+    print(" Attr Train: {} \tLabel Train: {} \t60%".format(
+        len(attr_train), len(label_train)))
+    print("Attr Test: {} \tLabel Test: {} \t40% \n".format(
+        len(attr_test), len(label_test)))
 
     count_pop_train = sum(1 for i in range(len(label_train)) if label_train[i] == 1)
     count_unpop_train = (len(label_train) - count_pop_train)
+
     count_pop_test = sum(1 for i in range(len(label_test)) if label_train[i] == 0)
     count_unpop_test = (len(label_test) - count_pop_test)
 
-    print(" Popular Train:", count_pop_train, "\tUnpopular Train:", count_unpop_train, "\n",
-        "Popular Test:", count_pop_test, "\tUnpopular Test:", count_unpop_test, "\n")
+    print(" Popular Train: {} \tUnpopular Train: {}".format(
+           count_pop_train, count_unpop_train))
+    print("Popular Test: {} \tUnpopular Test: {} \n".format(
+          count_pop_test, count_unpop_test))
 
     MNB = PopularDetector()
     MNB.fit(attr_train, label_train)
@@ -119,13 +135,19 @@ if __name__ == '__main__': # COMPILE WITH: python3 naive_bayes.py RATE USER
     pred = MNB.predict(attr_test)
     true = label_test
 
-    accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i]) / float(len(pred))
-    pop_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 1) / sum(1 for i in range(len(pred)) if true[i] == 1)
-    unp_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 0) / sum(1 for i in range(len(pred)) if true[i] == 0)
+    accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i]) / \
+        float(len(pred))
+
+    pop_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 1) / \
+        sum(1 for i in range(len(pred)) if true[i] == 1)
+
+    unp_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 0) / \
+        sum(1 for i in range(len(pred)) if true[i] == 0)
 
     print("---------------- Accuracy ----------------")
     print(" |General", "\t|Popular", "\t|Unpopular")
-    print(" |{0:.4f}".format(accuracy), "\t|{0:.4f}".format(pop_accuracy), "\t|{0:.4f}".format(unp_accuracy))
+    print(" |{0:.4f} \t|{1:.4f} \t|{2:.4f}".format(
+        accuracy, pop_accuracy, unp_accuracy))
 
     print("\nConfusion Matrix: \n")
     print(confusion_matrix(label_test, pred))

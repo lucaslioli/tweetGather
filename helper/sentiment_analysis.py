@@ -16,8 +16,10 @@ for tw in tweets:
         except:
             continue
 
-    up = conn.update_sentiment(tw['id'], text.sentiment.polarity, text.sentiment.subjectivity)
+    up = conn.update_sentiment(tw['id'], text.sentiment.polarity,
+                               text.sentiment.subjectivity)
 
-    print('\nNº: {0} \n - Tweet: {1} \n - Update: {2} \n - {3}'.format(i, tw['id'], up, text.sentiment))
+    print('\nNº: {0} \n - Tweet: {1} \n - Update: {2} \n - {3}'.format(i,
+          tw['id'], up, text.sentiment))
 
     i -= 1

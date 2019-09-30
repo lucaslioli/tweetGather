@@ -2,24 +2,26 @@ import sys
 import pymysql
 import pymysql.cursors
 
+
 class DbConnection(object):
 
-    # # # # # # # # # # # # # # # # # # # # # CONNECTION # # # # # # # # # # # # # # # # # # # # # #
+    # # # # # # # # # # # # # # # # CONNECTION # # # # # # # # # # # # # # # #
     def __init__(self):
         try:
             self.mysqlCon = pymysql.connect(
                 host        = '127.0.0.1',
                 user        = 'root',
-                password    = '3210',
+                password    = '321',
                 db          = 'tweetgather',
                 charset     = 'utf8mb4',
                 cursorclass = pymysql.cursors.DictCursor
             )
         except Exception as e:
-            print("Não foi possível estabeler uma conexão com o banco!\nERROR:", str(e))
+            print("Não foi possível estabelecer conexão com o banco!\
+                \nERROR:", str(e))
             exit()
 
-    # # # # # # # # # # # # # # # # # # # # WRITE OPERATIONS # # # # # # # # # # # # # # # # # # # #
+    # # # # # # # # # # # # # # # WRITE OPERATIONS # # # # # # # # # # # # # #
 
     def insert_user(self, user):
         if 'id' in user:
@@ -30,10 +32,14 @@ class DbConnection(object):
             user_language    = user["lang"]
 
             with self.mysqlCon.cursor() as cur:
-                sql = """INSERT INTO user (user_id, user_name, user_screen_name, user_following, user_language) 
-                    VALUES (%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE user_id=user_id"""
+                sql = """INSERT INTO user (user_id, user_name,
+                        user_screen_name, user_following, user_language)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE user_id = user_id"""
 
-                cur.execute(sql, (user_id, user_name, user_screen_name, user_following, user_language))
+                cur.execute(sql, (user_id, user_name, user_screen_name,
+                                  user_following, user_language))
+
                 self.mysqlCon.commit()
                 cur.close()
 
@@ -58,7 +64,7 @@ class DbConnection(object):
             tweet_hashtag       = 0 if tweet_text.find('#') == -1 else 1
             tweet_RT            = 0 if tweet_text.find('RT', 0, 2) == -1 else 1
             tweet_size          = len(tweet_text)
-            
+
             user_id             = tweet["user_id"]
             user_tweet_counter  = tweet["statuses_count"]
 
@@ -71,12 +77,24 @@ class DbConnection(object):
 
                 if(result is None):
                     with self.mysqlCon.cursor() as cur:
-                        sql = """INSERT INTO tweet (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity,
-                            tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE tweet_id=tweet_id"""
+                        sql = """INSERT INTO tweet (tweet_id, tweet_text,
+                            tweet_datetime, tweet_language, tweet_retweets,
+                            tweet_likes, tweet_polarity, tweet_subjectivity,
+                            tweet_url, tweet_hashtag, tweet_media,
+                            tweet_streamed, tweet_RT, tweet_size, user_id,
+                            user_tweet_counter)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                            %s, %s, %s, %s)
+                        ON DUPLICATE KEY UPDATE tweet_id=tweet_id"""
 
-                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime, tweet_language, tweet_retweets, tweet_likes, tweet_polarity, tweet_subjectivity, tweet_url, tweet_hashtag, tweet_media, tweet_streamed, tweet_RT, tweet_size, user_id, user_tweet_counter))
-                        
+                        cur.execute(sql, (tweet_id, tweet_text, tweet_datetime,
+                                          tweet_language, tweet_retweets,
+                                          tweet_likes, tweet_polarity,
+                                          tweet_subjectivity, tweet_url,
+                                          tweet_hashtag, tweet_media,
+                                          tweet_streamed, tweet_RT, tweet_size,
+                                          user_id, user_tweet_counter))
+
                         self.mysqlCon.commit()
                         cur.close()
 
@@ -85,18 +103,22 @@ class DbConnection(object):
         else:
             return False
 
-    def update_tweet(self, tweet_id, deleted=0, media=0, retweets=-1, likes=-1, text='', text_after='', ban_100=-1, ban_1000=-1, ban_3000=-1):
-    
+    def update_tweet(self, tweet_id, deleted=0, media=0, retweets=-1, likes=-1,
+                     text='', text_after='', ban_100=-1, ban_1k=-1, ban_3k=-1):
+
         sql = """UPDATE tweet SET deleted = %s, tweet_media = %s,
-                    tweet_retweets = %s, tweet_likes = %s, 
-                    tweet_text = %s, tweet_text_after = %s, 
-                    tweet_ban_100 = %s, tweet_ban_1000 = %s, tweet_ban_3000 = %s 
+                    tweet_retweets = %s, tweet_likes = %s,
+                    tweet_text = %s, tweet_text_after = %s,
+                    tweet_ban_100 = %s, tweet_ban_1000 = %s,
+                    tweet_ban_3000 = %s
                 WHERE tweet_id = %s"""
 
         cur = self.mysqlCon.cursor()
 
         try:
-            cur.execute(sql, (deleted, media, retweets, likes, text, text_after, ban_100, ban_1000, ban_3000, tweet_id))
+            cur.execute(sql, (deleted, media, retweets, likes, text,
+                              text_after, ban_100, ban_1k, ban_3k, tweet_id))
+
             self.mysqlCon.commit()
             result = "Ok"
 
@@ -109,7 +131,7 @@ class DbConnection(object):
         return result
 
     def update_tweet_text_after(self, tweet_id, text_after=''):
-    
+
         sql = "UPDATE tweet SET tweet_text_after = %s WHERE tweet_id = %s"
 
         cur = self.mysqlCon.cursor()
@@ -132,26 +154,43 @@ class DbConnection(object):
 
         try:
             print("Updating tweet text to remove the borring emoji '⃣'...")
-            cur.execute("UPDATE tweet SET tweet_text_after = REPLACE(tweet_text_after, '⃣', '') WHERE tweet_text_after like '%⃣%'")
+            cur.execute("UPDATE tweet SET \
+                tweet_text_after = REPLACE(tweet_text_after, '⃣', '') \
+                WHERE tweet_text_after like '%⃣%'")
 
             print("Updating usage of URLs...")
-            cur.execute("UPDATE tweet AS t SET tweet_url = 0 WHERE tweet_text NOT LIKE '%http%'")
-            cur.execute("UPDATE tweet AS t SET tweet_url = 1 WHERE tweet_text LIKE '%http%'")
+            cur.execute("UPDATE tweet AS t SET tweet_url = 0 \
+                WHERE tweet_text NOT LIKE '%http%'")
+
+            cur.execute("UPDATE tweet AS t SET tweet_url = 1 \
+                WHERE tweet_text LIKE '%http%'")
 
             print("Updating usage of Hashtags...")
-            cur.execute("UPDATE tweet SET tweet_hashtag = 0 WHERE tweet_text NOT LIKE '%#%'")
-            cur.execute("UPDATE tweet SET tweet_hashtag = 1 WHERE tweet_text LIKE '%#%'")
+            cur.execute("UPDATE tweet SET tweet_hashtag = 0 \
+                WHERE tweet_text NOT LIKE '%#%'")
+
+            cur.execute("UPDATE tweet SET tweet_hashtag = 1 \
+                WHERE tweet_text LIKE '%#%'")
 
             print("Updating tweets when they are retweets...")
-            cur.execute("UPDATE tweet SET tweet_RT = 0 WHERE tweet_text NOT LIKE 'RT @%'")
-            cur.execute("UPDATE tweet SET tweet_RT = 1 WHERE tweet_text LIKE 'RT @%'")
+            cur.execute("UPDATE tweet SET tweet_RT = 0 \
+                WHERE tweet_text NOT LIKE 'RT @%'")
+
+            cur.execute("UPDATE tweet SET tweet_RT = 1 \
+                WHERE tweet_text LIKE 'RT @%'")
 
             print("Updating the size range of each message...")
-            cur.execute("UPDATE tweet SET tweet_size = 0 WHERE LENGTH(tweet_text) = 0")
+            cur.execute("UPDATE tweet SET tweet_size = 0 \
+                WHERE LENGTH(tweet_text) = 0")
+
             for i in range(1, 26):
                 j = i*10
-                cur.execute("UPDATE tweet SET tweet_size = {0} WHERE LENGTH(tweet_text) <= {0} AND LENGTH(tweet_text) > {1}".format(j, j-10))
-            cur.execute("UPDATE tweet SET tweet_size = 255 WHERE LENGTH(tweet_text) <= 255 AND LENGTH(tweet_text) > 250")
+                cur.execute("UPDATE tweet SET tweet_size = {0} \
+                    WHERE LENGTH(tweet_text) <= {0} \
+                    AND LENGTH(tweet_text) > {1}".format(j, j-10))
+
+            cur.execute("UPDATE tweet SET tweet_size = 255 \
+                WHERE LENGTH(tweet_text) <= 255 AND LENGTH(tweet_text) > 250")
 
             self.mysqlCon.commit()
 
@@ -162,14 +201,18 @@ class DbConnection(object):
         cur.close()
 
     def update_user(self, user_id, info):
-        sql = """UPDATE user SET user_following = %s, user_followers = %s, 
-                    user_created_at = %s, user_location = %s, user_description = %s
+        sql = """UPDATE user SET user_following = %s,
+                    user_followers = %s, user_created_at = %s,
+                    user_location = %s, user_description = %s
                 WHERE user_id = %s"""
 
         cur = self.mysqlCon.cursor()
 
         try:
-            cur.execute(sql, (info['following'], info['followers'], info['created_at'], info['location'], info['description'], user_id))
+            cur.execute(sql, (info['following'], info['followers'],
+                              info['created_at'], info['location'],
+                              info['description'], user_id))
+
             self.mysqlCon.commit()
             result = "Ok"
 
@@ -181,11 +224,12 @@ class DbConnection(object):
 
         return result
 
-    # # # # # # # # # # # # # # # # # # # # READ OPERATIONS # # # # # # # # # # # # # # # # # # # #
+    # # # # # # # # # # # # # # # READ OPERATIONS # # # # # # # # # # # # # # #
 
-    def tweet_list(self, where = ''):
-        sql = """SELECT tweet_id as id, tweet_text as txt, tweet_language as lang, 
-                    tweet_retweets as retweets, tweet_likes as likes, deleted 
+    def tweet_list(self, where=''):
+        sql = """SELECT tweet_id as id, tweet_text as txt,
+                    tweet_language as lang, tweet_retweets as retweets,
+                    tweet_likes as likes, deleted
                 FROM tweet """ + where
 
         cur = self.mysqlCon.cursor()
@@ -197,7 +241,8 @@ class DbConnection(object):
         return result
 
     def last_tweets_list(self):
-        sql = """SELECT u.user_id, u.user_name, t.tweet_id, t.user_tweet_counter as tweet_counter,
+        sql = """SELECT u.user_id, u.user_name, t.tweet_id,
+                    t.user_tweet_counter as tweet_counter,
                     (SELECT MAX(t3.user_tweet_counter) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_max,
                     (SELECT COUNT(*) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS counter_diff,
                     (SELECT MIN(t3.tweet_id) FROM tweet AS t3 WHERE t3.user_id = t.user_id AND t3.tweet_streamed = 0) AS max_id
@@ -249,7 +294,8 @@ class DbConnection(object):
             sql = sql + " AND t.user_id = %s "
 
         if(counter):
-            sql = "SELECT popular, count(*) as count from (" + sql + ") as test group by popular order by popular"
+            sql = "SELECT popular, count(*) as count \
+                FROM (" + sql + ") as test GROUP BY popular ORDER BY popular"
 
         cur = self.mysqlCon.cursor()
 
