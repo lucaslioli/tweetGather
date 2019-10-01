@@ -10,7 +10,7 @@ from sklearn.metrics import confusion_matrix
 
 sys.path.append('./')
 from helper.db_connection import DbConnection
-from helper.prepare_dataset import get_data
+from prepare_dataset import get_data
 
 
 class PopularDetector(object):
