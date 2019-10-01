@@ -67,6 +67,7 @@ class DbConnection(object):
 
             user_id             = tweet["user_id"]
             user_tweet_counter  = tweet["statuses_count"]
+            user_followers  = tweet["followers_count"]
 
             with self.mysqlCon.cursor() as cur:
                 sql = "SELECT `tweet_id` FROM `tweet` WHERE `tweet_id` = %s"
@@ -82,7 +83,7 @@ class DbConnection(object):
                             tweet_likes, tweet_polarity, tweet_subjectivity,
                             tweet_url, tweet_hashtag, tweet_media,
                             tweet_streamed, tweet_RT, tweet_size, user_id,
-                            user_tweet_counter)
+                            user_tweet_counter, user_followers)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
                             %s, %s, %s, %s)
                         ON DUPLICATE KEY UPDATE tweet_id=tweet_id"""
@@ -93,7 +94,8 @@ class DbConnection(object):
                                           tweet_subjectivity, tweet_url,
                                           tweet_hashtag, tweet_media,
                                           tweet_streamed, tweet_RT, tweet_size,
-                                          user_id, user_tweet_counter))
+                                          user_id, user_tweet_counter,
+                                          user_followers))
 
                         self.mysqlCon.commit()
                         cur.close()
@@ -259,8 +261,8 @@ class DbConnection(object):
 
         return result
 
-    def users_list(self):
-        sql = """SELECT * FROM user"""
+    def users_list(self, where=''):
+        sql = """SELECT * FROM user """ + where
 
         cur = self.mysqlCon.cursor()
 
@@ -284,11 +286,11 @@ class DbConnection(object):
                     IF(t.tweet_RT = 1, 1, 0) as RT,
                     t.tweet_size,
                     IF(t.tweet_ban_3000 IS NOT NULL, CAST(t.tweet_ban_3000 AS DEC(4,2)), 0.00) AS banality,
-                    IF(((t.tweet_likes+t.tweet_retweets)/t.user_followers*100)>%s, 1, 0) as popular
+                    IF(((t.tweet_likes+t.tweet_retweets)/u.user_followers*100)>%s, 1, 0) as popular
                 FROM tweet as t
+                JOIN user as u ON t.user_id = u.user_id
                 WHERE t.tweet_language = 'en'
-                    AND tweet_text_after != ''
-                    AND user_followers > 10000"""
+                    AND tweet_text_after != ''"""
 
         if(user != 0):
             sql = sql + " AND t.user_id = %s "

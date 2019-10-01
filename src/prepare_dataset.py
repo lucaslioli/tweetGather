@@ -4,23 +4,31 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 
+sys.path.append('./')
 from helper.db_connection import DbConnection
 
 
-def get_data(rate, user=0, getText=0):
-    print("\n Engagement Rate:", (rate*100), "%")
-    print(" User:", user)
+def get_data(rate, user_id=0, getText=0):
+    print("\n Engagement Rate: {}%".format(rate*100))
 
     conn = DbConnection()
 
+    if user_id != 0:
+        user = conn.users_list('where user_id = {}'.format(user_id))
+        user_name = user[int(user_id)]
+    else:
+        user_name = "Not selected"
+
+    print(" User: {} - {}\n".format(user_id, user_name))
+
     # Get all the tweets with the attributes
-    tweets = conn.tweets_attr(rate, user)
+    tweets = conn.tweets_attr(rate, user_id)
 
     # Shuffle the list of tweets
     np.random.shuffle(tweets)
 
     # Get the number of popular and unpopular tweets considering the rate
-    n_popular = conn.tweets_attr(rate, user, 1)
+    n_popular = conn.tweets_attr(rate, user_id, 1)
 
     n_pop = []  # Array with counter of both classes
     n_pop.append(n_popular[0]["count"])  # Popular count considering the rate
@@ -64,11 +72,11 @@ def get_data(rate, user=0, getText=0):
             break
 
     total = n_pop[0] + n_pop[1]
-    print(" Total of tweets:", (total), "\t\tTotal used: ", len(target), "\n")
+    print(" TOTAL OF tweets:", (total), "\tUsed: ", len(target), "\n")
 
-    print(" Total of Popular:", n_pop[1], "\tUnpopular:", n_pop[0])
+    print(" TOTAL OF Popular:", n_pop[1], "\tUnpopular:", n_pop[0])
 
-    print(" Balanced Popular:", count_pop, "\tUnpopular:", count_unpop, "\n")
+    print(" BALANCED Popular:", count_pop, "\tUnpopular:", count_unpop, "\n")
 
     return data, target, n_pop
 
