@@ -277,7 +277,10 @@ class DbConnection(object):
 
         return result
 
-    def tweets_attr(self, rate, user=0, counter=0):
+    def tweets_attr(self, rate, user_id=0, counter=0):
+        # Users that must be ignored for some reason
+        ignored_users = "822215679726100480, 128372940, 25521487"
+        
         sql = """SELECT
                     t.tweet_text_after as txt,
                     IF(t.tweet_polarity IS NOT NULL, CAST(t.tweet_polarity AS DEC(4,2)), 0.00) AS polarity,
@@ -286,14 +289,15 @@ class DbConnection(object):
                     IF(t.tweet_RT = 1, 1, 0) as RT,
                     t.tweet_size,
                     IF(t.tweet_ban_3000 IS NOT NULL, CAST(t.tweet_ban_3000 AS DEC(4,2)), 0.00) AS banality,
-                    IF(((t.tweet_likes+t.tweet_retweets)/u.user_followers*100)>%s, 1, 0) as popular
+                    IF(((t.tweet_likes+t.tweet_retweets)/u.user_followers*100)>{}, 1, 0) as popular
                 FROM tweet as t
                 JOIN user as u ON t.user_id = u.user_id
                 WHERE t.tweet_language = 'en'
-                    AND tweet_text_after != ''"""
+                    AND t.tweet_text_after != ''
+                    AND t.user_id not in ({})""".format(rate, ignored_users)
 
-        if(user != 0):
-            sql = sql + " AND t.user_id = %s "
+        if(user_id != 0):
+            sql = sql + " AND t.user_id = {} ".format(user_id)
 
         if(counter):
             sql = "SELECT popular, count(*) as count \
@@ -301,10 +305,7 @@ class DbConnection(object):
 
         cur = self.mysqlCon.cursor()
 
-        if(user != 0):
-            cur.execute(sql, (rate, user))
-        else:
-            cur.execute(sql, rate)
+        cur.execute(sql)
 
         result = cur.fetchall()
 

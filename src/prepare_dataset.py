@@ -80,21 +80,21 @@ def get_data(rate, user_id=0, getText=0):
 
     return data, target, n_pop
 
-# COMPILE WITH: python3 generate_arff.py <rate> <useFor> <user> <getText>
+# COMPILE WITH: python3 generate_arff.py [useFor] [rate] [user] [getText]
 if __name__ == '__main__':
 
-    arg_names = ['command', 'rate', 'useFor', 'user', 'getText']
+    arg_names = ['command', 'useFor', 'rate', 'user', 'getText']
     args = dict(zip(arg_names, sys.argv))
+
+    # Identifies if the dataset will be used at Weka
+    if 'useFor' not in args:
+        args['useFor'] = "weka"
 
     # Minimum value of engagement rate to consider a tweet as popular
     if 'rate' not in args:
         args['rate'] = 0.02
     else:
         args['rate'] = float(args['rate'])
-
-    # Identifies if the dataset will be used at Weka
-    if 'useFor' not in args:
-        args['useFor'] = "weka"
 
     # The ID of specific user author
     if 'user' not in args:
