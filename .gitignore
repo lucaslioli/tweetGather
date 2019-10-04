@@ -102,15 +102,13 @@ ENV/
 
 # Twitter API tokens
 authenticate.py
-# Tweet Example
+# Notes
 tweet_exemple.txt
-# Scripts manuais de insersão
-insert_followers.sql
+annotation.*
 
 # Logfile
-logfile*.txt
+logs/*
 
-t.txt
-\.vscode/
+.vscode/
 
 *.arff

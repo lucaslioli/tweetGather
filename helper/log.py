@@ -12,7 +12,7 @@ def logfile(message="", filename=""):
     now = datetime.now()
     log_msg = "{} = {}\n".format(now, message)
 
-    f = open("logfile"+filename+'.txt', 'a')
+    f = open("logs/logfile"+filename+'.txt', 'a')
     f.write(log_msg)
     f.close()
 
