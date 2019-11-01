@@ -102,9 +102,9 @@ ENV/
 
 # Twitter API tokens
 authenticate.py
+
 # Notes
-tweet_exemple.txt
-annotation.*
+z_*.txt
 
 # Logfile
 logs/*
