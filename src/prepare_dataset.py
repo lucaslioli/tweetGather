@@ -9,7 +9,7 @@ from helper.db_connection import DbConnection
 
 
 def get_data(rate, user_id=0, getText=0):
-    print("\n Engagement Rate: {}%".format(rate*100))
+    print("\n Engagement Rate: {:.2f}%".format(rate*100))
 
     conn = DbConnection()
 
@@ -72,11 +72,11 @@ def get_data(rate, user_id=0, getText=0):
             break
 
     total = n_pop[0] + n_pop[1]
-    print(" TOTAL OF tweets:", (total), "\tUsed: ", len(target), "\n")
+    print(" TOTAL OF tweets:  {:<5} Used: {}\n".format(total, len(target)))
 
-    print(" TOTAL OF Popular:", n_pop[1], "\tUnpopular:", n_pop[0])
+    print(" TOTAL OF Popular: {:<5} Unpopular: {} ".format(n_pop[1], n_pop[0]))
 
-    print(" BALANCED Popular:", count_pop, "\tUnpopular:", count_unpop, "\n")
+    print(" BALANCED Popular: {:<5} Unpopular: {}\n".format(count_pop, count_unpop))
 
     return data, target, n_pop
 
