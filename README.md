@@ -57,5 +57,5 @@ def api_tokens(verify):
 
 🏆 **Premiação:** Melhor artigo de pesquisa do evento
 
-**Arquitetura do projeto**
+**Arquitetura de coleta e processamento dos dados**
 ![IMG](https://raw.githubusercontent.com/lucaslioli/tweetGather/master/display/assets/arquitetura.png)
