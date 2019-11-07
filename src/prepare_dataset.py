@@ -72,11 +72,12 @@ def get_data(rate, user_id=0, getText=0):
             break
 
     total = n_pop[0] + n_pop[1]
-    print(" TOTAL OF tweets:  {:<5} Used: {}\n".format(total, len(target)))
+    print(" TOTAL OF tweets:  {:<6} Used: {:<6} Lost: {}\n".format(
+        total, len(target), (total - len(target))))
 
-    print(" TOTAL OF Popular: {:<5} Unpopular: {} ".format(n_pop[1], n_pop[0]))
+    print(" TOTAL OF Popular: {:<6} Unpopular: {} ".format(n_pop[1], n_pop[0]))
 
-    print(" BALANCED Popular: {:<5} Unpopular: {}\n".format(count_pop, count_unpop))
+    print(" BALANCED Popular: {:<6} Unpopular: {}\n".format(count_pop, count_unpop))
 
     return data, target, n_pop
 
