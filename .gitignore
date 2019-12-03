@@ -87,6 +87,9 @@ celerybeat-schedule
 venv/
 ENV/
 
+# vscode files
+.vscode/
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -110,6 +113,6 @@ z_*.txt
 # Logfile
 logs/*
 
-.vscode/
-
-*.arff
+# Datasets
+ARFF/
+DATA/

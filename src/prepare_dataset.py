@@ -48,7 +48,7 @@ def get_data(rate, user_id=0, getText=0):
                 (count_unpop == max_class and tw['popular'] == 0):
             continue
 
-        if getText == 1:
+        if getText != 0:
             data.append(tw['txt'])
 
         else:
@@ -141,3 +141,39 @@ if __name__ == '__main__':
         f.close()
 
         print(" ARFF File generated: " + file_name + "\n")
+
+    if(args['useFor'] == "lstm"):
+        if not os.path.exists("DATA/" + str(args['user'])):
+            os.makedirs("DATA/" + str(args['user']))
+
+        popular, unpopular = [], []
+
+        for i, tw in enumerate(attr):
+            if label[i] == 1:
+                popular.append(tw)
+            else:
+                unpopular.append(tw)
+
+        file_name = "user_" + str(args['user']) + \
+            "_rate_" + str(args['rate']) + '.pop'
+
+        f = open("DATA/" + str(args['user']) + "/" + file_name, 'w')
+
+        for tw in popular:
+            f.write(tw + "\n")
+
+        f.close()
+
+        print(" Popular LSTM File generated: " + file_name)
+
+        file_name = "user_" + str(args['user']) + \
+            "_rate_" + str(args['rate']) + '.not'
+
+        f = open("DATA/" + str(args['user']) + "/" + file_name, 'w')
+        
+        for tw in unpopular:
+            f.write(tw + "\n")
+
+        f.close()
+
+        print(" Unpopular LSTM File generated: " + file_name + "\n")
