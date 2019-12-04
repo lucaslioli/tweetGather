@@ -81,6 +81,20 @@ def get_data(rate, user_id=0, getText=0):
 
     return data, target, n_pop
 
+
+def save_file(tweets, user, rate, use, ext):
+    rate = rate.replace('.', '')
+    file_name = "rate_{}_{}.{}".format(user, rate, use, ext)
+
+    f = open("DATA/{}/{}".format(user, file_name), 'w')
+
+    for tw in tweets:
+        f.write(tw + "\n")
+
+    f.close()
+
+    print(" LSTM File generated: " + file_name)
+
 # COMPILE WITH: python3 generate_arff.py [useFor] [rate] [user] [getText]
 if __name__ == '__main__':
 
@@ -146,34 +160,31 @@ if __name__ == '__main__':
         if not os.path.exists("DATA/" + str(args['user'])):
             os.makedirs("DATA/" + str(args['user']))
 
-        popular, unpopular = [], []
+        pop_train, pop_test, not_train, not_test = [], [], [], []
 
-        for i, tw in enumerate(attr):
+        attr_train, attr_test, label_train, label_test = \
+            train_test_split(attr, label, test_size=0.25, random_state=42)
+
+        print(" Train and Test split: {} - {}\n".format(len(attr_train), len(attr_test)))
+
+        for i, tw in enumerate(attr_train):
             if label[i] == 1:
-                popular.append(tw)
+                pop_train.append(tw)
             else:
-                unpopular.append(tw)
+                not_train.append(tw)
 
-        file_name = "user_" + str(args['user']) + \
-            "_rate_" + str(args['rate']) + '.pop'
+        for i, tw in enumerate(attr_test):
+            if label[i] == 1:
+                pop_test.append(tw)
+            else:
+                not_test.append(tw)
 
-        f = open("DATA/" + str(args['user']) + "/" + file_name, 'w')
+        print(" Train and Test split POP: {} - {}".format(len(pop_train), len(pop_test)))
+        print(" Train and Test split NOT: {} - {}\n".format(len(not_train), len(not_test)))
 
-        for tw in popular:
-            f.write(tw + "\n")
+        save_file(pop_train, args['user'], args['rate'], 'train', 'pop')
+        save_file(pop_test, args['user'], args['rate'], 'test', 'pop')
 
-        f.close()
-
-        print(" Popular LSTM File generated: " + file_name)
-
-        file_name = "user_" + str(args['user']) + \
-            "_rate_" + str(args['rate']) + '.not'
-
-        f = open("DATA/" + str(args['user']) + "/" + file_name, 'w')
-        
-        for tw in unpopular:
-            f.write(tw + "\n")
-
-        f.close()
-
-        print(" Unpopular LSTM File generated: " + file_name + "\n")
+        save_file(not_train, args['user'], args['rate'], 'train', 'not')
+        save_file(pop_test, args['user'], args['rate'], 'test', 'not')
+        print("")
