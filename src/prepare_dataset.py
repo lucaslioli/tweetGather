@@ -6,9 +6,10 @@ from sklearn.model_selection import train_test_split
 
 sys.path.append('./')
 from helper.db_connection import DbConnection
+from helper.text_processing import simple_cleaner
 
 
-def get_data(rate, user_id=0, getText=0):
+def get_data(rate, user_id=0, get_text=0):
     print("\n Engagement Rate: {:.2f}%".format(rate*100))
 
     conn = DbConnection()
@@ -47,8 +48,10 @@ def get_data(rate, user_id=0, getText=0):
         if (count_pop == max_class and tw['popular'] == 1) or \
                 (count_unpop == max_class and tw['popular'] == 0):
             continue
+        if get_text == "--fullText":
+            data.append(tw['full_txt'])
 
-        if getText != 0:
+        elif get_text != 0:
             data.append(tw['txt'])
 
         else:
@@ -83,13 +86,13 @@ def get_data(rate, user_id=0, getText=0):
 
 
 def save_file(tweets, user, rate, use, ext):
-    rate = rate.replace('.', '')
-    file_name = "rate_{}_{}.{}".format(user, rate, use, ext)
+    rate = str(rate).replace('.', '')
+    file_name = "rate_{}_{}.{}".format(rate, use, ext)
 
     f = open("DATA/{}/{}".format(user, file_name), 'w')
 
     for tw in tweets:
-        f.write(tw + "\n")
+        f.write(simple_cleaner(tw) + "\n")
 
     f.close()
 
@@ -160,7 +163,13 @@ if __name__ == '__main__':
         if not os.path.exists("DATA/" + str(args['user'])):
             os.makedirs("DATA/" + str(args['user']))
 
-        pop_train, pop_test, not_train, not_test = [], [], [], []
+        pop, notpop, pop_train, pop_test, not_train, not_test = ([] for i in range(6))
+
+        for i, tw in enumerate(attr):
+            if label[i] == 1:
+                pop.append(tw)
+            else:
+                notpop.append(tw)
 
         attr_train, attr_test, label_train, label_test = \
             train_test_split(attr, label, test_size=0.25, random_state=42)
@@ -186,5 +195,9 @@ if __name__ == '__main__':
         save_file(pop_test, args['user'], args['rate'], 'test', 'pop')
 
         save_file(not_train, args['user'], args['rate'], 'train', 'not')
-        save_file(pop_test, args['user'], args['rate'], 'test', 'not')
+        save_file(not_test, args['user'], args['rate'], 'test', 'not')
+
+        save_file(pop, args['user'], args['rate'], 'unique', 'pop')
+        save_file(notpop, args['user'], args['rate'], 'unique', 'not')
+        
         print("")

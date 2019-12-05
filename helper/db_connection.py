@@ -282,6 +282,7 @@ class DbConnection(object):
         ignored_users = "822215679726100480, 128372940, 25521487"
         
         sql = """SELECT
+                    t.tweet_text as full_txt,
                     t.tweet_text_after as txt,
                     IF(t.tweet_polarity IS NOT NULL, CAST(t.tweet_polarity AS DEC(4,2)), 0.00) AS polarity,
                     IF(t.tweet_url = 1, 1, 0) as url,
