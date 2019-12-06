@@ -29,7 +29,7 @@ if __name__ == '__main__':
         strout += output[1:output.find('User')]
 
         # Gets only the balanced instances information
-        strout += output[output.find('BALANCED'):-1]
+        strout += output[output.find('TOTAL OF tweets'):output.find('TOTAL OF Popular')-2]
 
         print(strout)
 
