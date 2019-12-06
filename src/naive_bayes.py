@@ -6,7 +6,7 @@ import math
 import numpy as np
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 
 sys.path.append('./')
 from helper.db_connection import DbConnection
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     # print(*attr_test, sep='\n')
     print(" Attr Train: {} \tLabel Train: {} \t60%".format(
         len(attr_train), len(label_train)))
-    print("Attr Test: {} \tLabel Test: {} \t40% \n".format(
+    print(" Attr Test: {} \tLabel Test: {} \t40% \n".format(
         len(attr_test), len(label_test)))
 
     count_pop_train = sum(1 for i in range(len(label_train)) if label_train[i] == 1)
@@ -126,28 +126,18 @@ if __name__ == '__main__':
 
     print(" Popular Train: {} \tUnpopular Train: {}".format(
            count_pop_train, count_unpop_train))
-    print("Popular Test: {} \tUnpopular Test: {} \n".format(
+    print(" Popular Test: {} \tUnpopular Test: {} \n".format(
           count_pop_test, count_unpop_test))
 
     MNB = PopularDetector()
     MNB.fit(attr_train, label_train)
 
-    pred = MNB.predict(attr_test)
-    true = label_test
+    y_pred = MNB.predict(attr_test)
+    y_true = label_test
 
-    accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i]) / \
-        float(len(pred))
+    dashs = "-" * 23
+    print("{0} METRICS {0}\n".format(dashs))
 
-    pop_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 1) / \
-        sum(1 for i in range(len(pred)) if true[i] == 1)
+    print(classification_report(y_true, y_pred, labels=[0, 1]))
 
-    unp_accuracy = sum(1 for i in range(len(pred)) if pred[i] == true[i] and true[i] == 0) / \
-        sum(1 for i in range(len(pred)) if true[i] == 0)
-
-    print("---------------- Accuracy ----------------")
-    print(" |General", "\t|Popular", "\t|Unpopular")
-    print(" |{0:.4f} \t|{1:.4f} \t|{2:.4f}".format(
-        accuracy, pop_accuracy, unp_accuracy))
-
-    print("\nConfusion Matrix: \n")
-    print(confusion_matrix(label_test, pred))
+    print(confusion_matrix(y_true, y_pred))
