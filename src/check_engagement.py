@@ -21,16 +21,20 @@ if __name__ == '__main__':
 
         command = ["python3", "src/prepare_dataset.py", "check", rate, args['user']]
 
-        output = subprocess.check_output(command, encoding='utf8')
+        try:
+            output = subprocess.check_output(command, encoding='utf8')
 
-        if rate == '0.002':
-            strout = "\n " + output[output.find('User'):output.find('TOTAL')-1]
+            if rate == '0.002':
+                strout = "\n " + output[output.find('User'):output.find('TOTAL')-1]
 
-        strout += output[1:output.find('User')]
+            strout += output[1:output.find('User')]
 
-        # Gets only the balanced instances information
-        strout += output[output.find('TOTAL OF tweets'):output.find('TOTAL OF Popular')-2]
+            # Gets only the balanced instances information
+            strout += output[output.find('TOTAL OF tweets'):output.find('TOTAL OF Popular')-2]
 
-        print(strout)
+            print(strout)
+
+        except:
+            print("Error trying to run the command: ", ' '.join(map(str, command)))
 
     exit()

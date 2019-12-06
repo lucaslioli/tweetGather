@@ -32,8 +32,13 @@ def get_data(rate, user_id=0, get_text=0):
     n_popular = conn.tweets_attr(rate, user_id, 1)
 
     n_pop = []  # Array with counter of both classes
-    n_pop.append(n_popular[0]["count"])  # Popular count considering the rate
-    n_pop.append(n_popular[1]["count"])  # Unpopular count considering the rate
+    
+    try:
+        n_pop.append(n_popular[0]["count"])  # Unpopular count considering the rate
+        n_pop.append(n_popular[1]["count"])  # Popular count considering the rate
+
+    except:
+        n_pop.append(0) # No one is popular
 
     # Variable to control the balance between the classes
     max_class = n_pop[0] if n_pop[0] < n_pop[1] else n_pop[1]
@@ -48,6 +53,7 @@ def get_data(rate, user_id=0, get_text=0):
         if (count_pop == max_class and tw['popular'] == 1) or \
                 (count_unpop == max_class and tw['popular'] == 0):
             continue
+
         if get_text == "--fullText":
             data.append(tw['full_txt'])
 
