@@ -10,7 +10,7 @@ No que corresponde a parte de coleta, estão disponíveis códigos para coleta d
 * Geração de arquivo de log; 
 * Pré-processamento do texto dos tweets; 
 * Análise de sentimentos (utilizando a biblioteca TextBlob); 
-* Preparação de arquivos do tipo ARFF para utilização no [Weka](https://www.cs.waikato.ac.nz/ml/weka/) conforme necessidades do projeto (mas detalhes sobre esse processo encontram-se no capítulo 3.4.1 sobre Balanceamento das Instâncias no PDF do TCC, página 29);
+* Preparação de arquivos do tipo ARFF para utilização no [Weka](https://www.cs.waikato.ac.nz/ml/weka/) conforme necessidades do projeto (mais detalhes sobre esse processo encontram-se no capítulo 3.4.1 sobre Balanceamento das Instâncias no PDF do TCC, logo abaixo, página 29);
 * Algoritmo Naive Bayes para classificação dos tweets utilizando o texto pré-processado.
 
 Maiores detalhes sobre a utilização dos algoritmos e resultados obtidos podem ser encontrados no artigo publicado e trabalho de conclusão de curso gerado.

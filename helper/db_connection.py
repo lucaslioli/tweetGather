@@ -1,6 +1,18 @@
+"""
+Database connection.
+
+Functions to insert, update and select data.
+Needs config setted at authenticate.py file. Exemple present in authenticate.example.py
+
+WRITE OPERATIONS:   insert_user, insert_tweet, update_tweet, update_tweet_text_after, auto_update_tweet, update_user
+READ OPERATIONS:    tweet_list, last_tweets_list, users_list, tweets_attr
+"""
+
 import sys
 import pymysql
 import pymysql.cursors
+
+from helper.authenticate import db_connection_data
 
 
 class DbConnection(object):
@@ -8,12 +20,14 @@ class DbConnection(object):
     # # # # # # # # # # # # # # # # CONNECTION # # # # # # # # # # # # # # # #
     def __init__(self):
         try:
+            conn_data = db_connection_data()
+
             self.mysqlCon = pymysql.connect(
-                host        = '127.0.0.1',
-                user        = 'root',
-                password    = '321',
-                db          = 'tweetgather',
-                charset     = 'utf8mb4',
+                host        = conn_data['host'],
+                user        = conn_data['user'],
+                password    = conn_data['password'],
+                db          = conn_data['db'],
+                charset     = conn_data['charset'],
                 cursorclass = pymysql.cursors.DictCursor
             )
         except Exception as e:
@@ -85,7 +99,7 @@ class DbConnection(object):
                             tweet_streamed, tweet_RT, tweet_size, user_id,
                             user_tweet_counter, user_followers)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-                            %s, %s, %s, %s)
+                            %s, %s, %s, %s, %s)
                         ON DUPLICATE KEY UPDATE tweet_id=tweet_id"""
 
                         cur.execute(sql, (tweet_id, tweet_text, tweet_datetime,

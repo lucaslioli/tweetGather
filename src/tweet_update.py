@@ -1,3 +1,13 @@
+"""
+Update tweets information, based on a query set in a constant.
+
+COMPILE WITH: $ python3 tweet_update.py [-api]
+
+[-api]: Set to make a complete update using Twitter API.
+        If not specified, automatic statistics update is performed.
+
+"""
+
 import sys
 import tweepy
 import time
@@ -46,7 +56,6 @@ def calc_banality(text, lang):
     return {'100': ban_100, '1000': ban_1000, '3000': ban_3000}
 
 
-# COMPILE WITH: $ python3 tweet_update.py [-api]
 if __name__ == '__main__':
 
     conn = DbConnection()
@@ -75,13 +84,14 @@ if __name__ == '__main__':
     # Complete update
     else:
         keys = api_tokens()
-        # Obtenção das chaves de atenticação da API
+
+        # API keys
         access_token = keys['access_token']
         access_token_secret = keys['access_token_secret']
         consumer_key = keys['consumer_key']
         consumer_secret = keys['consumer_secret']
 
-    # Autenticação com a API Tweepy
+    # Tweepy API authentication
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
 

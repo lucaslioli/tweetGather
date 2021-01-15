@@ -1,3 +1,16 @@
+"""
+Prepare data to be used in Weka or LSTM network.
+Return: Save a file with data formated
+
+COMPILE WITH: $ python3 generate_arff.py [useFor] [rate] [user] [getText]
+
+[useFor]:   Identifies if the dataset will be used with Weka or LSTM
+[rate]:     Minimum value of engagement rate to consider a tweet as popular
+[user]:     The ID of a specific user author
+[getText]:  Indicate if the tweet text will be used
+
+"""
+
 import os
 import sys
 import numpy as np
@@ -104,7 +117,7 @@ def save_file(tweets, user, rate, use, ext):
 
     print(" LSTM File generated: " + file_name)
 
-# COMPILE WITH: python3 generate_arff.py [useFor] [rate] [user] [getText]
+
 if __name__ == '__main__':
 
     arg_names = ['command', 'useFor', 'rate', 'user', 'getText']

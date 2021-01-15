@@ -1,3 +1,10 @@
+"""
+Update information from users in the database.
+Friends count, followers, language, account creation, location, and description.
+
+COMPILE WITH: $ python3 user_update.py
+"""
+
 import sys
 import tweepy
 

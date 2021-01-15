@@ -1,3 +1,10 @@
+"""
+Start stream to collect tweets posted by authors followed by the main account.
+Save log operations. Insert new users. Process status to insert in the database.
+
+COMPILE WITH: $ python3 stream_listener.py
+"""
+
 import sys
 import tweepy
 import datetime
@@ -147,13 +154,14 @@ def start_stream(query=None):
 # COMPILE WITH: $ python3 stream_listener.py
 if __name__ == '__main__':
     keys = api_tokens()
-    # Obtenção das chaves de atenticação da API
+
+    # API keys
     access_token        = keys['access_token']
     access_token_secret = keys['access_token_secret']
     consumer_key        = keys['consumer_key']
     consumer_secret     = keys['consumer_secret']
 
-    # Autenticação com a API
+    # API auth
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
 
